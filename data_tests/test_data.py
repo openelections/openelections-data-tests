@@ -27,10 +27,4 @@ class DuplicateEntriesTest(unittest.TestCase):
                     for row in reader:
                         data_test.test(row)
 
-                passed = True
-                message = f"\n\n{short_path}"
-                if not data_test.passed:
-                    passed = False
-                    message += f"\n\n* {data_test.get_failure_message()}"
-
-                self.assertTrue(passed, message)
+                self.assertTrue(data_test.passed, data_test.get_failure_message())
