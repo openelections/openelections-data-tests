@@ -3,6 +3,7 @@ import unittest
 
 from data_tests.test_data import DuplicateEntriesTest
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("test", type=str, help="the data test to run")
