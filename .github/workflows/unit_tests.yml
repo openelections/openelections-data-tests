@@ -1,0 +1,22 @@
+name: Unit Tests
+
+on: [push, pull_request]
+
+jobs:
+  unit_tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+
+    - name: Check out code
+      uses: actions/checkout@v2.3.4
+
+    - name: Run unit tests
+      run: python3 -m unittest discover tests
