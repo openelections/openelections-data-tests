@@ -47,6 +47,7 @@ class DuplicateEntries:
         return message
 
     def test(self, row: list):
+        self.__current_row += 1
         if not DuplicateEntries.__is_empty(row):
             row_hash = DuplicateEntries.__hash_row(row)
             if row_hash in self.__hash_to_row_numbers:
@@ -54,5 +55,3 @@ class DuplicateEntries:
                 self.__hash_to_row[row_hash] = row
             else:
                 self.__hash_to_row_numbers[row_hash] = [self.__current_row]
-
-        self.__current_row += 1
