@@ -5,19 +5,24 @@ from hashlib import sha256
 class DuplicateEntries:
     __non_whitespace_regex = re.compile(r"\S")
 
-    def __init__(self):
+    def __init__(self, headers: list[str]):
         super().__init__()
         self.__current_row = 0
-        self.__hash_to_row = {}
-        self.__hash_to_row_numbers = {}
+        self.__hash_to_rows = {}
+        self.__passed = True
+        self.__headers = headers
 
     @property
     def passed(self) -> bool:
-        return len(self.__hash_to_row) == 0
+        return self.__passed
 
-    @staticmethod
-    def __hash_row(row: list[str]) -> str:
-        hashed_entries = [sha256(x.encode()).hexdigest() for x in row]
+    def __hash_row(self, row: list[str]) -> str:
+        non_vote_entries = []
+        for i, x in enumerate(self.__headers):
+            if "votes" not in x.lower():
+                non_vote_entries.append(row[i])
+
+        hashed_entries = [sha256(x.encode()).hexdigest() for x in non_vote_entries]
         return sha256("".join(hashed_entries).encode()).hexdigest()
 
     @staticmethod
@@ -30,28 +35,30 @@ class DuplicateEntries:
 
     def get_failure_message(self, max_examples: int = -1) -> str:
         num_duplicates = 0
-        for _, rows in self.__hash_to_row_numbers.items():
-            num_duplicates += len(rows) - 1
+        for _, rows in self.__hash_to_rows.items():
+            if len(rows) > 1:
+                num_duplicates += len(rows) - 1
 
         message = f"{num_duplicates} duplicate rows detected:\n"
         count = 0
-        for key, value in self.__hash_to_row.items():
-            for row_number in self.__hash_to_row_numbers[key]:
-                if (max_examples >= 0) and (count >= max_examples):
-                    message += f"\n\t[Truncated to {max_examples} examples]"
-                    return message
-                else:
-                    message += f"\n\tRow {row_number}: {value}"
-                    count += 1
+        for row_hash, row_map in self.__hash_to_rows.items():
+            if len(row_map) > 1:
+                for row_number, row in row_map.items():
+                    if (max_examples >= 0) and (count >= max_examples):
+                        message += f"\n\t[Truncated to {max_examples} examples]"
+                        return message
+                    else:
+                        message += f"\n\tRow {row_number}: {row}"
+                        count += 1
 
         return message
 
     def test(self, row: list):
         self.__current_row += 1
         if not DuplicateEntries.__is_empty(row):
-            row_hash = DuplicateEntries.__hash_row(row)
-            if row_hash in self.__hash_to_row_numbers:
-                self.__hash_to_row_numbers[row_hash].append(self.__current_row)
-                self.__hash_to_row[row_hash] = row
+            row_hash = self.__hash_row(row)
+            if row_hash in self.__hash_to_rows:
+                self.__passed = False
+                self.__hash_to_rows[row_hash][self.__current_row] = row
             else:
-                self.__hash_to_row_numbers[row_hash] = [self.__current_row]
+                self.__hash_to_rows[row_hash] = {self.__current_row: row}
