@@ -23,7 +23,6 @@ class DuplicateEntries:
                 if "votes" not in x.lower():
                     entries_to_hash.append(row[i])
         else:
-            # If this row has an inconsistent number of columns, just hash the entire row.
             entries_to_hash = row
 
         hashed_entries = [sha256(x.encode()).hexdigest() for x in entries_to_hash]
