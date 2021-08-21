@@ -19,7 +19,7 @@ class DuplicateEntriesTest(unittest.TestCase):
         self.assertFalse(data_test.passed)
 
         failure_message = data_test.get_failure_message()
-        self.assertRegex(failure_message, "1 duplicate row")
+        self.assertRegex(failure_message, "1 duplicate entries")
         self.assertNotRegex(failure_message, "Row 1.*")
         self.assertNotRegex(failure_message, "Row 2.*")
         self.assertRegex(failure_message, "Row 3.*" + re.escape(f"{rows[2]}"))
@@ -58,7 +58,7 @@ class DuplicateEntriesTest(unittest.TestCase):
         self.assertFalse(data_test.passed)
 
         failure_message = data_test.get_failure_message()
-        self.assertRegex(failure_message, "2 duplicate row")
+        self.assertRegex(failure_message, "2 duplicate entries")
         self.assertNotRegex(failure_message, "Row 1.*")
         self.assertRegex(failure_message, "Row 2.*" + re.escape(f"{rows[1]}"))
         self.assertNotRegex(failure_message, "Row 3.*")

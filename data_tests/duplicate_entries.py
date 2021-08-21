@@ -42,7 +42,7 @@ class DuplicateEntries:
             if len(rows) > 1:
                 num_duplicates += len(rows) - 1
 
-        message = f"{num_duplicates} duplicate rows detected:\n"
+        message = f"{num_duplicates} duplicate entries detected:\n"
         count = 0
         for row_hash, row_map in self.__hash_to_rows.items():
             if len(row_map) > 1:
