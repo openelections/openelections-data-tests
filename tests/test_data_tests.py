@@ -1,7 +1,7 @@
 import re
 import unittest
 
-from data_tests import duplicate_entries, inconsistencies
+from data_tests import duplicate_entries, inconsistencies, missing_values
 
 
 class DuplicateEntriesTest(unittest.TestCase):
@@ -89,6 +89,53 @@ class DuplicateEntriesTest(unittest.TestCase):
         for row in rows:
             data_test.test(row)
         self.assertTrue(data_test.passed)
+
+
+class MissingValueTest(unittest.TestCase):
+    def test_empty(self):
+        data_test = missing_values.MissingValue("b", ["a", "b", "c"])
+        data_test.test(["1", "2", "3"])
+        data_test.test(["1", "", "3"])
+        data_test.test(["1", "2", "3"])
+        self.assertFalse(data_test.passed)
+
+        failure_message = data_test.get_failure_message()
+        self.assertIsNotNone(failure_message)
+        self.assertNotEqual("", failure_message)
+
+    def test_index_out_of_range(self):
+        data_test = missing_values.MissingValue("b", ["a", "b", "c"])
+        data_test.test(["1", "2", "3"])
+        data_test.test(["1"])
+        self.assertFalse(data_test.passed)
+
+        failure_message = data_test.get_failure_message()
+        self.assertIsNotNone(failure_message)
+        self.assertNotEqual("", failure_message)
+
+    def test_not_applicable(self):
+        data_test = missing_values.MissingValue("d", ["a", "b", "c"])
+        data_test.test(["1", "", "3"])
+        data_test.test(["1", " ", "3"])
+        self.assertTrue(data_test.passed)
+
+    def test_not_missing(self):
+        data_test = missing_values.MissingValue("b", ["a", "b", "c"])
+        data_test.test(["1", "2", "3"])
+        data_test.test(["1", " 2", "3"])
+        data_test.test(["1", "2 ", "3"])
+        self.assertTrue(data_test.passed)
+
+    def test_whitespace(self):
+        data_test = missing_values.MissingValue("b", ["a", "b", "c"])
+        data_test.test(["1", "2", "3"])
+        data_test.test(["1", " \n\t", "3"])
+        data_test.test(["1", "2", "3"])
+        self.assertFalse(data_test.passed)
+
+        failure_message = data_test.get_failure_message()
+        self.assertIsNotNone(failure_message)
+        self.assertNotEqual("", failure_message)
 
 
 class VoteBreakdownTotalsTest(unittest.TestCase):
