@@ -28,21 +28,15 @@ class DuplicateEntries:
 
         return not has_content
 
-    def get_failure_message(self, max_examples: int = 10) -> str:
+    def get_failure_message(self) -> str:
         num_duplicates = 0
         for _, rows in self.__hash_to_row_numbers.items():
             num_duplicates += len(rows) - 1
 
         message = f"{num_duplicates} duplicate rows detected:\n"
-        count = 1
         for key, value in self.__hash_to_row.items():
             for row_number in self.__hash_to_row_numbers[key]:
                 message += f"\n\tRow {row_number}: {value}"
-                count += 1
-
-                if count > max_examples:
-                    message += f"\n\t[Truncated to {max_examples} examples]"
-                    return message
 
         return message
 
