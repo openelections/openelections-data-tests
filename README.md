@@ -5,7 +5,17 @@ A collection of tests to validate the contents of OpenElections data files.
 
 ## Usage
 ```
-$ python3 run_tests.py <test> <absolute path to data repository>
+usage: run_tests.py [-h] [--log-file LOG_FILE] [--max-console-lines MAX_CONSOLE_LINES] test root_path
+
+positional arguments:
+  test                  the data test to run
+  root_path             the absolute path to the repository containing files to test
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --log-file LOG_FILE   the absolute path to a file that the full failure messages will be written to
+  --max-console-lines MAX_CONSOLE_LINES
+                        the maximum number of lines of a failure message to print to the console
 ```
 
 The data are expected to be contained in CSV files that reside under
