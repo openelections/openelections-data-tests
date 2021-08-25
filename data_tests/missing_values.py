@@ -15,17 +15,18 @@ class MissingValue:
     def passed(self) -> bool:
         return len(self.__failures) == 0
 
-    def get_failure_message(self, max_examples: int = 10) -> str:
+    def get_failure_message(self, max_examples: int = -1) -> str:
         message = f"There are {len(self.__failures)} rows that are missing a {self.__required_value}:\n\n" \
                   f"\tHeaders: {self.__headers}:"
 
-        count = 1
-        for key, value in self.__failures.items():
-            message += f"\n\tRow {key}: {value}"
-            count += 1
-            if count > max_examples:
+        count = 0
+        for row_number, row in self.__failures.items():
+            if (max_examples >= 0) and (count >= max_examples):
                 message += f"\n\t[Truncated to {max_examples} examples]"
-                break
+                return message
+            else:
+                message += f"\n\tRow {row_number}: {row}"
+                count += 1
 
         return message
 
