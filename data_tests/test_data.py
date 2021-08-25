@@ -1,7 +1,7 @@
 import csv
 import glob
+import logging
 import os
-import traceback
 import unittest
 from typing import Iterator
 
@@ -14,39 +14,41 @@ def get_csv_files(root_path: str) -> Iterator[str]:
             yield file
 
 
-class TruncatedTestResult(unittest.TextTestResult):
-    log_file = None
-    max_console_lines = float("inf")
+def get_logger(name: str, log_file: str):
+    handler = logging.FileHandler(log_file)
+    handler.setFormatter(logging.Formatter("%(message)s"))
 
-    def addSubTest(self, test, subtest, outcome):
-        # If outcome is None, the subtest succeeded. Otherwise, it failed with an exception where outcome is a tuple
-        # of the form returned by sys.exc_info(): (type, value, traceback).
-        if outcome is None:
-            super().addSubTest(test, subtest, outcome)
-        else:
-            # Add the truncated message to the list of failures, but keep the original for the log file.
-            original_message = "".join(traceback.format_exception(outcome[0], outcome[1], outcome[2], 0))
-            original_message_list = original_message.splitlines()
-            extra_lines = len(original_message_list) - TruncatedTestResult.max_console_lines
-            if extra_lines > 0:
-                new_message_list = original_message_list[:TruncatedTestResult.max_console_lines]
-                new_message_list.append(f"[Truncated {extra_lines} lines]")
-                new_message = "\n".join(new_message_list)
-            else:
-                new_message = original_message
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
 
-            super().addSubTest(test, subtest, (outcome[0], AssertionError(new_message), outcome[2]))
+    return logger
 
-            if TruncatedTestResult.log_file is not None:
-                with open(TruncatedTestResult.log_file, "a") as file:
-                    file.write("======================================================================\n")
-                    file.write(f"FAIL: {subtest}\n")
-                    file.write("======================================================================\n")
-                    file.write(f"{original_message}\n\n")
+
+def log_failure(logger: logging.Logger, description: str, message: str):
+    if logger is not None:
+        logger.debug("======================================================================")
+        logger.debug(f"FAIL: {description}")
+        logger.debug("----------------------------------------------------------------------")
+        logger.debug(f"{message}\n")
 
 
 class DuplicateEntriesTest(unittest.TestCase):
     root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+    log_file = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if DuplicateEntriesTest.log_file is None:
+            self.__logger = None
+        else:
+            self.__logger = get_logger("Duplicate Entries", DuplicateEntriesTest.log_file)
+
+    def __assertTrue(self, result: bool, description: str, short_message: str, full_message: str):
+        if not result:
+            log_failure(self.__logger, description, full_message)
+        self.assertTrue(result, short_message)
 
     def test_duplicate_entries(self):
         for csv_file in get_csv_files(DuplicateEntriesTest.root_path):
@@ -59,4 +61,6 @@ class DuplicateEntriesTest(unittest.TestCase):
                     for row in reader:
                         data_test.test(row)
 
-                self.assertTrue(data_test.passed, data_test.get_failure_message())
+                short_message = data_test.get_failure_message()
+                full_message = f"{data_test.get_failure_message(max_examples=-1)}"
+                self.__assertTrue(data_test.passed, f"{self} [{short_path}]", short_message, full_message)
