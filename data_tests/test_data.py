@@ -14,7 +14,7 @@ def get_csv_files(root_path: str) -> Iterator[str]:
             yield file
 
 
-def _get_logger(name: str, log_file: str):
+def _get_logger(name: str, log_file: str) -> logging.Logger:
     handler = logging.FileHandler(log_file)
     handler.setFormatter(logging.Formatter("%(message)s"))
 
