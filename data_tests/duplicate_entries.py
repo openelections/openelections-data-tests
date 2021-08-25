@@ -12,16 +12,23 @@ class DuplicateEntries:
         self.__passed = True
         self.__headers = headers
 
+        indices_to_hash = []
+        for i, x in enumerate(self.__headers):
+            lowered_header = x.lower()
+            not_vote_column = "votes" not in lowered_header
+            not_vote_column &= lowered_header not in ["early_voting", "election_day", "mail", "provisional"]
+            if not_vote_column:
+                indices_to_hash.append(i)
+
+        self.__indices_to_hash = indices_to_hash
+
     @property
     def passed(self) -> bool:
         return self.__passed
 
     def __hash_row(self, row: list[str]) -> str:
         if len(row) == len(self.__headers):
-            entries_to_hash = []
-            for i, x in enumerate(self.__headers):
-                if "votes" not in x.lower():
-                    entries_to_hash.append(row[i])
+            entries_to_hash = [row[i] for i in self.__indices_to_hash]
         else:
             entries_to_hash = row
 

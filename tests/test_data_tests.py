@@ -7,8 +7,8 @@ from data_tests import duplicate_entries
 class DuplicateEntriesTest(unittest.TestCase):
     def test_ragged_with_duplicates(self):
         rows = [
-            ["header 1", "votes", "header 3"],
-            ["a", "b", "c"],
+            ["header 1", "votes", "header 3", "early_voting", "election_day", "mail", "provisional"],
+            ["a", "b", "", "d", "e", "f", "g"],
             ["a", "b", "c", "d"],
             ["a", "b", "c", "d"]
         ]
@@ -27,8 +27,9 @@ class DuplicateEntriesTest(unittest.TestCase):
 
     def test_ragged_without_duplicates(self):
         rows = [
-            ["header 1", "votes", "header 3"],
-            ["a", "b", "c"],
+            ["header 1", "votes", "header 3", "early_voting", "election_day", "mail", "provisional"],
+            ["a", "b", "c", "d", "e", "f", "g"],
+            ["a", "b", "cc", "d", "e", "f", "g"],
             ["a", "b", "c", "d"],
             ["a", "b", "d", "e"],
             ["", "a", "b", "d", "e"],
@@ -44,12 +45,12 @@ class DuplicateEntriesTest(unittest.TestCase):
 
     def test_with_duplicates(self):
         rows = [
-            ["header 1", "header 2", "a_votes_b", "c_votes_d", "header 5"],
-            ["a", "b", "c", "d", "e"],
-            ["d", "e", "f", "g", "h"],
-            ["a", "b", "cc", "d", "e"],
-            ["a", "b", "c", "dd", "e"],
-            ["d", "e", "f", "g", "i"]
+            ["header 1", "header 2", "a_votes_b", "c_votes_d", "early_voting", "election_day", "mail", "provisional"],
+            ["a", "b", "c", "d", "e", "f", "g", "h"],
+            ["d", "e", "f", "g", "e", "f", "g", "h"],
+            ["a", "b", "cc", "d", "ee", "f", "gg", "h"],
+            ["a", "b", "c", "dd", "e", "ff", "g", "hh"],
+            ["d", "ee", "f", "g", "e", "f", "g", "h"]
         ]
 
         data_test = duplicate_entries.DuplicateEntries(rows[0])
@@ -64,15 +65,16 @@ class DuplicateEntriesTest(unittest.TestCase):
         self.assertNotRegex(failure_message, "Row 3.*")
         self.assertRegex(failure_message, "Row 4.*" + re.escape(f"{rows[3]}"))
         self.assertRegex(failure_message, "Row 5.*" + re.escape(f"{rows[4]}"))
+        self.assertNotRegex(failure_message, "Row 6.*")
 
     def test_without_duplicates(self):
         rows = [
-            ["header 1", "header 2", "a_votes_b", "c_votes_d", "header 5"],
-            ["a", "b", "c", "d", "e"],
-            ["ab", "", "c", "d", "e"],
-            ["a", "b", "c", "de", ""],
-            ["", "", "", "", ""],
-            ["", "", "", "", ""]
+            ["header 1", "header 2", "a_votes_b", "header 5", "early_voting", "election_day", "mail", "provisional"],
+            ["a", "b", "c", "d", "e", "f", "g", "h"],
+            ["ab", "", "c", "d", "e", "f", "g", "h"],
+            ["a", "b", "c", "de", "", "f", "g", "h"],
+            ["", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", ""]
         ]
 
         data_test = duplicate_entries.DuplicateEntries(rows[0])
