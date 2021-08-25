@@ -14,7 +14,7 @@ def get_csv_files(root_path: str) -> Iterator[str]:
             yield file
 
 
-def get_logger(name: str, log_file: str):
+def _get_logger(name: str, log_file: str):
     handler = logging.FileHandler(log_file)
     handler.setFormatter(logging.Formatter("%(message)s"))
 
@@ -25,7 +25,7 @@ def get_logger(name: str, log_file: str):
     return logger
 
 
-def log_failure(logger: logging.Logger, description: str, message: str):
+def _log_failure(logger: logging.Logger, description: str, message: str):
     if logger is not None:
         logger.debug("======================================================================")
         logger.debug(f"FAIL: {description}")
@@ -43,11 +43,11 @@ class DuplicateEntriesTest(unittest.TestCase):
         if DuplicateEntriesTest.log_file is None:
             self.__logger = None
         else:
-            self.__logger = get_logger("Duplicate Entries", DuplicateEntriesTest.log_file)
+            self.__logger = _get_logger("Duplicate Entries", DuplicateEntriesTest.log_file)
 
     def __assertTrue(self, result: bool, description: str, short_message: str, full_message: str):
         if not result:
-            log_failure(self.__logger, description, full_message)
+            _log_failure(self.__logger, description, full_message)
         self.assertTrue(result, short_message)
 
     def test_duplicate_entries(self):
