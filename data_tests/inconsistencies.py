@@ -1,4 +1,4 @@
-class VoteMethodTotals:
+class VoteBreakdownTotals:
     def __init__(self, headers: list[str]):
         self.__headers = headers
         self.__failures = {}

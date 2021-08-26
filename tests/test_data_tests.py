@@ -91,8 +91,8 @@ class DuplicateEntriesTest(unittest.TestCase):
         self.assertTrue(data_test.passed)
 
 
-class VoteMethodTotalsTest(unittest.TestCase):
-    def test_vote_method_totals(self):
+class VoteBreakdownTotalsTest(unittest.TestCase):
+    def test_vote_breakdown_totals(self):
         headers = ["header", "provisional", "mail", "votes", "early_voting", "election_day", "absentee", "polling"]
         rows = [
             ["a", "1", "2", "21", "3", "4", "5", "6"],
@@ -106,7 +106,7 @@ class VoteMethodTotalsTest(unittest.TestCase):
             ["a", "10", "2", "10", "3", "4", "5", "5", "6"]
         ]
 
-        data_test = inconsistencies.VoteMethodTotals(headers)
+        data_test = inconsistencies.VoteBreakdownTotals(headers)
         for row in rows:
             data_test.test(row)
         self.assertTrue(data_test.passed)
@@ -119,7 +119,7 @@ class VoteMethodTotalsTest(unittest.TestCase):
             ["a", "", "2", "19", "3", "4", "5", "6"]
         ]
 
-        data_test = inconsistencies.VoteMethodTotals(headers)
+        data_test = inconsistencies.VoteBreakdownTotals(headers)
         for row in rows:
             data_test.test(row)
         self.assertFalse(data_test.passed)
@@ -132,6 +132,6 @@ class VoteMethodTotalsTest(unittest.TestCase):
 
     def test_missing_votes_header(self):
         headers = ["header", "provisional", "mail", "early_voting", "election_day"]
-        data_test = inconsistencies.VoteMethodTotals(headers)
+        data_test = inconsistencies.VoteBreakdownTotals(headers)
         data_test.test(["a", "1", "8", "3", "4"])
         self.assertTrue(data_test.passed)
