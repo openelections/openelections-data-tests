@@ -1,7 +1,7 @@
 import argparse
 import unittest
 
-from data_tests.test_data import DuplicateEntriesTest, TestCase
+from data_tests.test_data import DuplicateEntriesTest, TestCase, VoteMethodTotalsTest
 
 
 if __name__ == "__main__":
@@ -18,6 +18,9 @@ if __name__ == "__main__":
     test_class = None
     if args.test == "duplicate_entries":
         test_class = DuplicateEntriesTest
+    elif args.test == "vote_method_totals":
+        VoteMethodTotalsTest.root_path = args.root_path
+        test_class = VoteMethodTotalsTest
     else:
         raise ValueError(f"Unrecognized data test '{args.test}'.")
 
