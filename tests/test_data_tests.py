@@ -93,17 +93,17 @@ class DuplicateEntriesTest(unittest.TestCase):
 
 class VoteBreakdownTotalsTest(unittest.TestCase):
     def test_vote_breakdown_totals(self):
-        headers = ["header", "provisional", "mail", "votes", "early_voting", "election_day", "absentee", "polling"]
+        headers = ["header", "provisional", "mail", "votes", "early_voting", "election_day", "absentee"]
         rows = [
-            ["a", "1", "2", "21", "3", "4", "5", "6"],
-            ["a", "2", "1", "22", "3", "4", "5", "6"],
-            ["a", "1", "2", "21.0", "0", "7", "5", "6"],
-            ["a", "", "3", "21", "3", "4", "5", "6"],
-            ["a", "b", "3", "22", "3", "4", "5", "6"],
-            ["a", "", "", "21", "", "", "5", "6"],
-            ["a", "1", "2", "*", "3", "4", "5", "6"],
-            ["a", "1", "2", "", "3", "4", "5", "6"],
-            ["a", "10", "2", "10", "3", "4", "5", "5", "6"]
+            ["a", "1", "2", "15", "3", "4", "5"],
+            ["a", "2", "1", "16", "3", "4", "5"],
+            ["a", "1", "2", "15.0", "0", "7", "5"],
+            ["a", "", "3", "15", "3", "4", "5"],
+            ["a", "b", "3", "16", "3", "4", "5"],
+            ["a", "", "", "15", "", "", "5"],
+            ["a", "1", "2", "*", "3", "4", "5"],
+            ["a", "1", "2", "", "3", "4", "5"],
+            ["a", "10", "2", "10", "3", "4", "5", "5"]
         ]
 
         data_test = inconsistencies.VoteBreakdownTotals(headers)
@@ -112,11 +112,11 @@ class VoteBreakdownTotalsTest(unittest.TestCase):
         self.assertTrue(data_test.passed)
 
     def test_inconsistent(self):
-        headers = ["header", "provisional", "mail", "votes", "early_voting", "election_day", "absentee", "polling"]
+        headers = ["header", "provisional", "mail", "votes", "early_voting", "election_day", "absentee"]
         rows = [
-            ["a", "1", "3", "21", "3", "4", "5", "6"],
-            ["a", "1", "2", "21", "3", "4", "5", "6"],
-            ["a", "", "2", "19", "3", "4", "5", "6"]
+            ["a", "1", "3", "15", "3", "4", "5"],
+            ["a", "1", "2", "15", "3", "4", "5"],
+            ["a", "", "2", "13", "3", "4", "5"]
         ]
 
         data_test = inconsistencies.VoteBreakdownTotals(headers)

@@ -10,7 +10,7 @@ class VoteBreakdownTotals:
         else:
             self.__votes_index = None
 
-        components = {"absentee", "early_voting", "election_day", "mail", "polling", "provisional"}
+        components = {"absentee", "early_voting", "election_day", "mail", "provisional"}
         self.__component_indices = [i for i, x in enumerate(self.__headers) if x in components]
 
     @property
