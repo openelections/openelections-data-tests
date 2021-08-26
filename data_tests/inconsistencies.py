@@ -18,7 +18,8 @@ class VoteMethodTotals:
         return len(self.__failures) == 0
 
     def get_failure_message(self, max_examples: int = 10) -> str:
-        message = f"There are {len(self.__failures)} rows with inconsistent vote values:\n\n" \
+        components = [self.__headers[i] for i in self.__component_indices]
+        message = f"There are {len(self.__failures)} rows where the sum of {components} is greater than 'votes':\n\n" \
                   f"\tHeaders: {self.__headers}:"
 
         count = 0

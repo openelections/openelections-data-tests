@@ -125,7 +125,7 @@ class VoteMethodTotalsTest(unittest.TestCase):
         self.assertFalse(data_test.passed)
 
         failure_message = data_test.get_failure_message()
-        self.assertRegex(failure_message, "2 rows.*inconsistent")
+        self.assertRegex(failure_message, "2 rows")
         self.assertRegex(failure_message, "Row 1.*" + re.escape(f"{rows[0]}"))
         self.assertNotRegex(failure_message, "Row 2.*")
         self.assertRegex(failure_message, "Row 3.*" + re.escape(f"{rows[2]}"))
