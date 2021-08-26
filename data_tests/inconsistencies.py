@@ -6,7 +6,7 @@ class VoteBreakdownTotals:
 
         votes = "votes"
         if votes in self.__headers:
-            self.__votes_index = self.__headers.index("votes")
+            self.__votes_index = self.__headers.index(votes)
         else:
             self.__votes_index = None
 
