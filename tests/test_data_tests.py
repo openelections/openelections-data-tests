@@ -93,16 +93,17 @@ class DuplicateEntriesTest(unittest.TestCase):
 
 class VoteMethodTotalsTest(unittest.TestCase):
     def test_vote_method_totals(self):
-        headers = ["header", "provisional", "mail", "votes", "early_voting", "election_day"]
+        headers = ["header", "provisional", "mail", "votes", "early_voting", "election_day", "absentee", "polling"]
         rows = [
-            ["a", "1", "2", "10", "3", "4"],
-            ["a", "2", "1", "10", "3", "4"],
-            ["a", "1", "2", "10.0", "0", "7"],
-            ["a", "", "3", "10", "3", "4"],
-            ["a", "b", "3", "10", "3", "4"],
-            ["a", "", "", "10", "", ""],
-            ["a", "1", "2", "*", "3", "4"],
-            ["a", "10", "2", "10", "3", "4", "5"]
+            ["a", "1", "2", "21", "3", "4", "5", "6"],
+            ["a", "2", "1", "22", "3", "4", "5", "6"],
+            ["a", "1", "2", "21.0", "0", "7", "5", "6"],
+            ["a", "", "3", "21", "3", "4", "5", "6"],
+            ["a", "b", "3", "22", "3", "4", "5", "6"],
+            ["a", "", "", "21", "", "", "5", "6"],
+            ["a", "1", "2", "*", "3", "4", "5", "6"],
+            ["a", "1", "2", "", "3", "4", "5", "6"],
+            ["a", "10", "2", "10", "3", "4", "5", "5", "6"]
         ]
 
         data_test = inconsistencies.VoteMethodTotals(headers)
@@ -111,11 +112,11 @@ class VoteMethodTotalsTest(unittest.TestCase):
         self.assertTrue(data_test.passed)
 
     def test_inconsistent(self):
-        headers = ["header", "provisional", "mail", "votes", "early_voting", "election_day"]
+        headers = ["header", "provisional", "mail", "votes", "early_voting", "election_day", "absentee", "polling"]
         rows = [
-            ["a", "1", "3", "10", "3", "4"],
-            ["a", "1", "2", "10", "3", "4"],
-            ["a", "", "2", "10", "3", "4"]
+            ["a", "1", "3", "21", "3", "4", "5", "6"],
+            ["a", "1", "2", "21", "3", "4", "5", "6"],
+            ["a", "", "2", "19", "3", "4", "5", "6"]
         ]
 
         data_test = inconsistencies.VoteMethodTotals(headers)
@@ -129,9 +130,8 @@ class VoteMethodTotalsTest(unittest.TestCase):
         self.assertNotRegex(failure_message, "Row 2.*")
         self.assertRegex(failure_message, "Row 3.*" + re.escape(f"{rows[2]}"))
 
-    def test_missing_headers(self):
-        headers = ["header", "votes", "provisional", "mail", "early_voting", "election_day"]
-        for k in range(1, len(headers)):
-            data_test = inconsistencies.VoteMethodTotals([x for i, x in enumerate(headers) if i != k])
-            data_test.test(["a", "1", "8", "3", "4"])
-            self.assertTrue(data_test.passed)
+    def test_missing_votes_header(self):
+        headers = ["header", "provisional", "mail", "early_voting", "election_day"]
+        data_test = inconsistencies.VoteMethodTotals(headers)
+        data_test.test(["a", "1", "8", "3", "4"])
+        self.assertTrue(data_test.passed)

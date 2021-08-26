@@ -10,11 +10,8 @@ class VoteMethodTotals:
         else:
             self.__votes_index = None
 
-        components = {"early_voting", "election_day", "mail", "provisional"}
-        component_indices = None
-        if set(headers).issuperset(components | {votes}):
-            component_indices = [i for i, x in enumerate(self.__headers) if x in components]
-        self.__component_indices = component_indices
+        components = {"absentee", "early_voting", "election_day", "mail", "polling", "provisional"}
+        self.__component_indices = [i for i, x in enumerate(self.__headers) if x in components]
 
     @property
     def passed(self) -> bool:
@@ -45,17 +42,13 @@ class VoteMethodTotals:
             except ValueError:
                 return
 
-            # We will only compare the values if there is at least one component value.
             component_sum = 0
-            has_component = False
             for component in (row[i] for i in self.__component_indices):
                 try:
                     component_value = float(component)
-                    has_component = True
                 except ValueError:
                     component_value = 0
-
                 component_sum += component_value
 
-            if has_component and votes != component_sum:
+            if votes < component_sum:
                 self.__failures[self.__current_row] = row
