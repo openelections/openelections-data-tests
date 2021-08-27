@@ -33,5 +33,5 @@ directories named by the corresponding election years.  For example,
 ```
 
 ## Available Tests
-* `duplicate_entries` detects the presence of duplicated entries.
+* `duplicate_entries` detects the presence of duplicate entries.
 
