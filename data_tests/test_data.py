@@ -61,6 +61,6 @@ class DuplicateEntriesTest(unittest.TestCase):
                     for row in reader:
                         data_test.test(row)
 
-                short_message = data_test.get_failure_message()
-                full_message = f"{data_test.get_failure_message(max_examples=-1)}"
+                short_message = data_test.get_failure_message(max_examples=10)
+                full_message = f"{data_test.get_failure_message()}"
                 self.__assertTrue(data_test.passed, f"{self} [{short_path}]", short_message, full_message)

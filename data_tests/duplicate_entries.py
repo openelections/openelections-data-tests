@@ -28,7 +28,7 @@ class DuplicateEntries:
 
         return not has_content
 
-    def get_failure_message(self, max_examples: int = 10) -> str:
+    def get_failure_message(self, max_examples: int = -1) -> str:
         num_duplicates = 0
         for _, rows in self.__hash_to_row_numbers.items():
             num_duplicates += len(rows) - 1
