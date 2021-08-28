@@ -71,12 +71,10 @@ class DuplicateEntriesTest(TestCase):
                 self._assertTrue(data_test.passed, f"{self} [{short_path}]", short_message, full_message)
 
 
-class VoteBreakdownTotalsTest(unittest.TestCase):
-    root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-
+class VoteBreakdownTotalsTest(TestCase):
     def test_vote_method_totals(self):
-        for csv_file in get_csv_files(VoteBreakdownTotalsTest.root_path):
-            short_path = os.path.relpath(csv_file, start=VoteBreakdownTotalsTest.root_path)
+        for csv_file in get_csv_files(TestCase.root_path):
+            short_path = os.path.relpath(csv_file, start=TestCase.root_path)
 
             with self.subTest(msg=f"{short_path}"):
                 with open(csv_file, "r") as csv_data:
@@ -87,4 +85,6 @@ class VoteBreakdownTotalsTest(unittest.TestCase):
                     for row in reader:
                         data_test.test(row)
 
-                self.assertTrue(data_test.passed, data_test.get_failure_message())
+                short_message = data_test.get_failure_message(max_examples=10)
+                full_message = data_test.get_failure_message()
+                self._assertTrue(data_test.passed, f"{self} [{short_path}]", short_message, full_message)

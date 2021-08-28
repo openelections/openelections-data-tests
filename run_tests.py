@@ -19,7 +19,6 @@ if __name__ == "__main__":
     if args.test == "duplicate_entries":
         test_class = DuplicateEntriesTest
     elif args.test == "vote_breakdown_totals":
-        VoteBreakdownTotalsTest.root_path = args.root_path
         test_class = VoteBreakdownTotalsTest
     else:
         raise ValueError(f"Unrecognized data test '{args.test}'.")
