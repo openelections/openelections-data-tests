@@ -1,7 +1,7 @@
 import argparse
 import unittest
 
-from data_tests.test_data import DuplicateEntriesTest
+from data_tests.test_data import DuplicateEntriesTest, TestCase
 
 
 if __name__ == "__main__":
@@ -12,10 +12,11 @@ if __name__ == "__main__":
                                                      "be written to")
     args = parser.parse_args()
 
+    TestCase.root_path = args.root_path
+    TestCase.log_file = args.log_file
+
     test_class = None
     if args.test == "duplicate_entries":
-        DuplicateEntriesTest.root_path = args.root_path
-        DuplicateEntriesTest.log_file = args.log_file
         test_class = DuplicateEntriesTest
     else:
         raise ValueError(f"Unrecognized data test '{args.test}'.")
