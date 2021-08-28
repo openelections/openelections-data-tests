@@ -8,7 +8,7 @@ class DuplicateEntries:
     def __init__(self, headers: list[str]):
         super().__init__()
         self.__current_row = 0
-        self.__hash_to_rows = {}
+        self.__hash_to_row_map = {}
         self.__passed = True
         self.__headers = headers
 
@@ -45,14 +45,14 @@ class DuplicateEntries:
 
     def get_failure_message(self, max_examples: int = -1) -> str:
         num_duplicates = 0
-        for _, rows in self.__hash_to_rows.items():
+        for _, rows in self.__hash_to_row_map.items():
             if len(rows) > 1:
                 num_duplicates += len(rows) - 1
 
         message = f"{num_duplicates} duplicate entries detected:\n\n" \
-          f"\tHeaders: {self.__headers}:"
+                  f"\tHeaders: {self.__headers}:"
         count = 0
-        for row_hash, row_map in self.__hash_to_rows.items():
+        for row_hash, row_map in self.__hash_to_row_map.items():
             if len(row_map) > 1:
                 for row_number, row in row_map.items():
                     if (max_examples >= 0) and (count >= max_examples):
@@ -68,8 +68,8 @@ class DuplicateEntries:
         self.__current_row += 1
         if not DuplicateEntries.__is_empty(row):
             row_hash = self.__hash_row(row)
-            if row_hash in self.__hash_to_rows:
+            if row_hash in self.__hash_to_row_map:
                 self.__passed = False
-                self.__hash_to_rows[row_hash][self.__current_row] = row
+                self.__hash_to_row_map[row_hash][self.__current_row] = row
             else:
-                self.__hash_to_rows[row_hash] = {self.__current_row: row}
+                self.__hash_to_row_map[row_hash] = {self.__current_row: row}
