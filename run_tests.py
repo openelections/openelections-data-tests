@@ -1,18 +1,22 @@
 import argparse
 import unittest
 
-from data_tests.test_data import DuplicateEntriesTest
+from data_tests.test_data import DuplicateEntriesTest, TestCase
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("test", type=str, help="the data test to run")
     parser.add_argument("root_path", type=str, help="the absolute path to the repository containing files to test")
+    parser.add_argument("--log-file", type=str, help="the absolute path to a file that the full failure messages will "
+                                                     "be written to")
     args = parser.parse_args()
+
+    TestCase.root_path = args.root_path
+    TestCase.log_file = args.log_file
 
     test_class = None
     if args.test == "duplicate_entries":
-        DuplicateEntriesTest.root_path = args.root_path
         test_class = DuplicateEntriesTest
     else:
         raise ValueError(f"Unrecognized data test '{args.test}'.")
