@@ -16,7 +16,7 @@ class DuplicateEntries:
         for i, x in enumerate(self.__headers):
             lowered_header = x.lower()
             not_vote_column = "votes" not in lowered_header
-            not_vote_column &= lowered_header not in ["absentee", "early_voting", "election_day", "mail", "provisional"]
+            not_vote_column &= lowered_header not in {"absentee", "early_voting", "election_day", "mail", "provisional"}
             if not_vote_column:
                 indices_to_hash.append(i)
 
