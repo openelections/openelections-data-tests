@@ -1,4 +1,8 @@
+import csv
+import os
 import re
+import subprocess
+import tempfile
 import unittest
 
 from data_tests import duplicate_entries, inconsistencies, missing_values
@@ -89,6 +93,55 @@ class DuplicateEntriesTest(unittest.TestCase):
         for row in rows:
             data_test.test(row)
         self.assertTrue(data_test.passed)
+
+
+class RunTestsTest(unittest.TestCase):
+    data_dir = None
+    rows = [
+        ["county", "precinct", "absentee", "votes"],
+        ["a", "b", 1, 2],
+        ["a", "b", 2, 3],  # Duplicate of row 2
+        ["", "c", 1, 2],  # Missing county
+        ["c", "d", 3, 2],  # Vote breakdown totals > votes
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.data_dir = tempfile.TemporaryDirectory()
+        year_dir = os.path.join(cls.data_dir.name, "2020")
+        os.mkdir(year_dir)
+        _, csv_file_path = tempfile.mkstemp(suffix=".csv", dir=year_dir, text=True)
+        with open(csv_file_path, "w") as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerows(cls.rows)
+
+    def setUp(self):
+        self.log_file = tempfile.NamedTemporaryFile(dir=self.data_dir.name)
+
+    def run_test(self, test, expected_message, expected_rows):
+        command = ["python", os.path.join("..", "run_tests.py"), test, f"--log-file={self.log_file.name}",
+                   self.data_dir.name]
+        completed_process = subprocess.run(command, capture_output=True)
+        self.assertEqual(1, completed_process.returncode)
+
+        with open(self.log_file.name, "r") as log_file:
+            log_file_contents = "\n".join(log_file.readlines())
+
+        self.assertRegex(log_file_contents, expected_message)
+        for i in range(0, len(self.rows)):
+            if i in expected_rows:
+                self.assertRegex(log_file_contents, f"Row {i}.*")
+            else:
+                self.assertNotRegex(log_file_contents, "Row 1.*")
+
+    def test_duplicate_entries(self):
+        self.run_test("duplicate_entries", "1 duplicate entries", [2, 3])
+
+    def test_missing_values(self):
+        self.run_test("missing_values", "1 rows.*missing.*county", [4])
+
+    def test_vote_breakdown_totals(self):
+        self.run_test("vote_breakdown_totals", "1 rows.*absentee.*", [5])
 
 
 # noinspection DuplicatedCode
