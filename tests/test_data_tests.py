@@ -92,7 +92,7 @@ class DuplicateEntriesTest(unittest.TestCase):
 
 
 class VoteBreakdownTotalsTest(unittest.TestCase):
-    def test_vote_breakdown_totals(self):
+    def test_consistent(self):
         headers = ["header", "provisional", "mail", "votes", "early_voting", "election_day", "absentee"]
         rows = [
             ["a", "1", "2", "15", "3", "4", "5"],
