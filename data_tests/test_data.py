@@ -56,9 +56,12 @@ class DuplicateEntriesTest(TestCase):
             short_path = os.path.relpath(csv_file, start=TestCase.root_path)
 
             with self.subTest(msg=f"{short_path}"):
-                data_test = DuplicateEntries()
                 with open(csv_file, "r") as csv_data:
                     reader = csv.reader(csv_data)
+                    headers = next(reader)
+
+                    data_test = DuplicateEntries(headers)
+                    data_test.test(headers)
                     for row in reader:
                         data_test.test(row)
 
