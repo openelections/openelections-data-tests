@@ -6,7 +6,8 @@ from data_tests.test_data import DuplicateEntriesTest, MissingValuesTest, TestCa
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("test", type=str, help="the data test to run")
+    parser.add_argument("test", choices=["duplicate_entries", "missing_values", "vote_breakdown_totals"], type=str,
+                        help="the data test to run")
     parser.add_argument("root_path", type=str, help="the absolute path to the repository containing files to test")
     parser.add_argument("--log-file", type=str, help="the absolute path to a file that the full failure messages will "
                                                      "be written to")
