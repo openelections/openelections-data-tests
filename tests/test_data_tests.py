@@ -100,16 +100,16 @@ class RunTestsTest(unittest.TestCase):
     bad_data_dir = None
     bad_rows = [
         ["county", "precinct", "absentee", "votes"],
-        ["a", "b", 1, 2],
-        ["a", "b", 2, 3],  # Duplicate of row 2
-        ["", "c", 1, 2],  # Missing county
-        ["c", "d", 3, 2],  # Vote breakdown totals > votes
+        ["a", "b", "1", "2"],
+        ["a", "b", "2", "3"],  # Duplicate of row "2"
+        ["", "c", "1", "2"],  # Missing county
+        ["c", "d", "3", "2"],  # Vote breakdown totals > votes
     ]
     good_data_dir = None
     good_rows = [
         ["county", "precinct", "absentee", "votes"],
-        ["a", "b", 1, 2],
-        ["c", "d", 2, 3],
+        ["a", "b", "1", "2"],
+        ["c", "d", "2", "3"],
     ]
 
     @classmethod
@@ -162,7 +162,7 @@ class RunTestsTest(unittest.TestCase):
         self.assertRegex(log_file_contents, expected_message)
         for i in range(0, len(self.bad_rows)):
             if i in expected_rows:
-                self.assertRegex(log_file_contents, f"Row {i}.*")
+                self.assertRegex(log_file_contents, f"Row {i}.*" + re.escape(f"{self.bad_rows[i - 1]}"))
             else:
                 self.assertNotRegex(log_file_contents, "Row 1.*")
 
