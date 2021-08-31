@@ -6,6 +6,7 @@ import unittest
 from typing import Iterator
 
 from data_tests.duplicate_entries import DuplicateEntries
+from data_tests.inconsistencies import VoteBreakdownTotals
 
 
 def get_csv_files(root_path: str) -> Iterator[str]:
@@ -62,6 +63,25 @@ class DuplicateEntriesTest(TestCase):
 
                     data_test = DuplicateEntries(headers)
                     data_test.test(headers)
+                    for row in reader:
+                        data_test.test(row)
+
+                short_message = data_test.get_failure_message(max_examples=10)
+                full_message = data_test.get_failure_message()
+                self._assertTrue(data_test.passed, f"{self} [{short_path}]", short_message, full_message)
+
+
+class VoteBreakdownTotalsTest(TestCase):
+    def test_vote_method_totals(self):
+        for csv_file in get_csv_files(TestCase.root_path):
+            short_path = os.path.relpath(csv_file, start=TestCase.root_path)
+
+            with self.subTest(msg=f"{short_path}"):
+                with open(csv_file, "r") as csv_data:
+                    reader = csv.reader(csv_data)
+                    headers = next(reader)
+
+                    data_test = VoteBreakdownTotals(headers)
                     for row in reader:
                         data_test.test(row)
 
