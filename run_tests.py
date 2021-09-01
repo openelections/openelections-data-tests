@@ -1,7 +1,7 @@
 import argparse
 import unittest
 
-from data_tests.test_data import DuplicateEntriesTest, TestCase, VoteBreakdownTotalsTest
+from data_tests.test_data import DuplicateEntriesTest, MissingValuesTest, TestCase, VoteBreakdownTotalsTest
 
 
 if __name__ == "__main__":
@@ -18,6 +18,8 @@ if __name__ == "__main__":
     test_class = None
     if args.test == "duplicate_entries":
         test_class = DuplicateEntriesTest
+    elif args.test == "missing_values":
+        test_class = MissingValuesTest
     elif args.test == "vote_breakdown_totals":
         test_class = VoteBreakdownTotalsTest
     else:

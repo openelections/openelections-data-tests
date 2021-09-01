@@ -1,7 +1,7 @@
 import re
 import unittest
 
-from data_tests import duplicate_entries, inconsistencies
+from data_tests import duplicate_entries, inconsistencies, missing_values
 
 
 class DuplicateEntriesTest(unittest.TestCase):
@@ -89,6 +89,89 @@ class DuplicateEntriesTest(unittest.TestCase):
         for row in rows:
             data_test.test(row)
         self.assertTrue(data_test.passed)
+
+
+# noinspection DuplicatedCode
+class MissingValueTest(unittest.TestCase):
+    def test_empty(self):
+        headers = ["a", "b", "c"]
+        rows = [
+            ["1", "2", "3"],
+            ["1", "", "3"],
+            ["1", "2", "3"]
+        ]
+
+        data_test = missing_values.MissingValue("b", headers)
+        for row in rows:
+            data_test.test(row)
+        self.assertFalse(data_test.passed)
+
+        failure_message = data_test.get_failure_message()
+        self.assertRegex(failure_message, "1 rows")
+        self.assertNotRegex(failure_message, "Row 1.*")
+        self.assertRegex(failure_message, "Row 2.*" + re.escape(f"{rows[1]}"))
+        self.assertNotRegex(failure_message, "Row 3.*")
+
+    def test_index_out_of_range(self):
+        headers = ["a", "b", "c"]
+        rows = [
+            ["1", "2", "3"],
+            ["1"]
+        ]
+
+        data_test = missing_values.MissingValue("b", headers)
+        for row in rows:
+            data_test.test(row)
+        self.assertFalse(data_test.passed)
+
+        failure_message = data_test.get_failure_message()
+        self.assertRegex(failure_message, "1 rows")
+        self.assertNotRegex(failure_message, "Row 1.*")
+        self.assertRegex(failure_message, "Row 2.*" + re.escape(f"{rows[1]}"))
+
+    def test_not_applicable(self):
+        headers = ["a", "b", "c"]
+        rows = [
+            ["1", "", "3"],
+            ["1", " ", "3"]
+        ]
+
+        data_test = missing_values.MissingValue("d", headers)
+        for row in rows:
+            data_test.test(row)
+        self.assertTrue(data_test.passed)
+
+    def test_not_missing(self):
+        headers = ["a", "b", "c"]
+        rows = [
+            ["1", "2", "3"],
+            ["1", " 2", "3"],
+            ["1", "2 ", "3"]
+        ]
+
+        data_test = missing_values.MissingValue("b", headers)
+        for row in rows:
+            data_test.test(row)
+        self.assertTrue(data_test.passed)
+
+    def test_whitespace(self):
+        headers = ["a", "b", "c"]
+        rows = [
+            ["1", "2", "3"],
+            ["1", " \n\t", "3"],
+            ["1", "2", "3"]
+        ]
+
+        data_test = missing_values.MissingValue("b", headers)
+        for row in rows:
+            data_test.test(row)
+        self.assertFalse(data_test.passed)
+
+        failure_message = data_test.get_failure_message()
+        self.assertRegex(failure_message, "1 rows")
+        self.assertNotRegex(failure_message, "Row 1.*")
+        self.assertRegex(failure_message, "Row 2.*" + re.escape(f"{rows[1]}"))
+        self.assertNotRegex(failure_message, "Row 3.*")
 
 
 class VoteBreakdownTotalsTest(unittest.TestCase):
