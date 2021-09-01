@@ -1,4 +1,8 @@
+import csv
+import os
 import re
+import subprocess
+import tempfile
 import unittest
 
 from data_tests import duplicate_entries, inconsistencies, missing_values
@@ -172,6 +176,76 @@ class MissingValueTest(unittest.TestCase):
         self.assertNotRegex(failure_message, "Row 1.*")
         self.assertRegex(failure_message, "Row 2.*" + re.escape(f"{rows[1]}"))
         self.assertNotRegex(failure_message, "Row 3.*")
+
+
+class RunTestsTest(unittest.TestCase):
+    bad_data_dir = None
+    bad_rows = [
+        ["county", "precinct", "absentee", "votes"],
+        ["a", "b", "1", "2"],
+        ["a", "b", "2", "3"],  # Duplicate of row 1
+        ["", "c", "1", "2"],  # Missing county
+        ["c", "d", "3", "2"],  # Vote breakdown totals > votes
+    ]
+    good_data_dir = None
+    good_rows = [
+        ["county", "precinct", "absentee", "votes"],
+        ["a", "b", "1", "2"],
+        ["c", "d", "2", "3"],
+    ]
+
+    @staticmethod
+    def create_data(root_path, year, rows):
+        year_dir = os.path.join(root_path, year)
+        os.mkdir(year_dir)
+        _, csv_file_path = tempfile.mkstemp(suffix=".csv", dir=year_dir, text=True)
+        with open(csv_file_path, "w") as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerows(rows)
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bad_data_dir = tempfile.TemporaryDirectory()
+        RunTestsTest.create_data(cls.bad_data_dir.name, "2020", cls.bad_rows)
+
+        cls.good_data_dir = tempfile.TemporaryDirectory()
+        RunTestsTest.create_data(cls.good_data_dir.name, "2020", cls.good_rows)
+
+    def setUp(self):
+        self.log_file = tempfile.NamedTemporaryFile(dir=self.bad_data_dir.name)
+
+    def run_test(self, test, root_path):
+        command = ["python", os.path.join("..", "run_tests.py"), test, f"--log-file={self.log_file.name}", root_path]
+        completed_process = subprocess.run(command, capture_output=True)
+        return completed_process.returncode
+
+    def test_duplicate_entries(self):
+        self.verify_success("duplicate_entries")
+        self.verify_failure("duplicate_entries", "1 duplicate entries", [2, 3])
+
+    def test_missing_values(self):
+        self.verify_success("missing_values")
+        self.verify_failure("missing_values", "1 rows.*missing.*county", [4])
+
+    def test_vote_breakdown_totals(self):
+        self.verify_success("vote_breakdown_totals")
+        self.verify_failure("vote_breakdown_totals", "1 rows.*absentee.*", [5])
+
+    def verify_success(self, test):
+        self.assertEqual(0, self.run_test(test, self.good_data_dir.name))
+
+    def verify_failure(self, test, expected_message, expected_rows):
+        self.assertEqual(1, self.run_test(test, self.bad_data_dir.name))
+
+        with open(self.log_file.name, "r") as log_file:
+            log_file_contents = "\n".join(log_file.readlines())
+
+        self.assertRegex(log_file_contents, expected_message)
+        for i in range(1, len(self.bad_rows) + 1):
+            if i in expected_rows:
+                self.assertRegex(log_file_contents, f"Row {i}.*" + re.escape(f"{self.bad_rows[i - 1]}"))
+            else:
+                self.assertNotRegex(log_file_contents, f"Row {i}.*")
 
 
 class VoteBreakdownTotalsTest(unittest.TestCase):
