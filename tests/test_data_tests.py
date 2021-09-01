@@ -243,11 +243,11 @@ class RunTestsTest(unittest.TestCase):
             log_file_contents = "\n".join(log_file.readlines())
 
         self.assertRegex(log_file_contents, expected_message)
-        for i in range(0, len(self.bad_rows)):
+        for i in range(1, len(self.bad_rows) + 1):
             if i in expected_rows:
                 self.assertRegex(log_file_contents, f"Row {i}.*" + re.escape(f"{self.bad_rows[i - 1]}"))
             else:
-                self.assertNotRegex(log_file_contents, "Row 1.*")
+                self.assertNotRegex(log_file_contents, f"Row {i}.*")
 
 
 class VoteBreakdownTotalsTest(unittest.TestCase):
