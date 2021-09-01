@@ -121,6 +121,7 @@ class VoteBreakdownTotalsTest(TestCase):
                     headers = next(reader)
 
                     data_test = VoteBreakdownTotals(headers)
+                    data_test.test(headers)
                     for row in reader:
                         data_test.test(row)
 
