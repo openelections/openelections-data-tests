@@ -184,7 +184,7 @@ class RunTestsTest(unittest.TestCase):
     bad_rows = [
         ["county", "precinct", "absentee", "votes"],
         ["a", "b", "1", "2"],
-        ["a", "b", "2", "3"],  # Duplicate of row "2"
+        ["a", "b", "2", "3"],  # Duplicate of row 1
         ["", "c", "1", "2"],  # Missing county
         ["c", "d", "3", "2"],  # Vote breakdown totals > votes
     ]
