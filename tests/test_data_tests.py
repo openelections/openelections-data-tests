@@ -178,7 +178,6 @@ class MissingValueTest(unittest.TestCase):
         self.assertNotRegex(failure_message, "Row 3.*")
 
 
-# noinspection DuplicatedCode
 class RunTestsTest(unittest.TestCase):
     bad_data_dir = None
     bad_rows = [
@@ -195,23 +194,22 @@ class RunTestsTest(unittest.TestCase):
         ["c", "d", "2", "3"],
     ]
 
+    @staticmethod
+    def create_data(root_path, year, rows):
+        year_dir = os.path.join(root_path, year)
+        os.mkdir(year_dir)
+        _, csv_file_path = tempfile.mkstemp(suffix=".csv", dir=year_dir, text=True)
+        with open(csv_file_path, "w") as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerows(rows)
+
     @classmethod
     def setUpClass(cls):
         cls.bad_data_dir = tempfile.TemporaryDirectory()
-        bad_year_dir = os.path.join(cls.bad_data_dir.name, "2020")
-        os.mkdir(bad_year_dir)
-        _, csv_file_path = tempfile.mkstemp(suffix=".csv", dir=bad_year_dir, text=True)
-        with open(csv_file_path, "w") as csv_file:
-            writer = csv.writer(csv_file)
-            writer.writerows(cls.bad_rows)
+        RunTestsTest.create_data(cls.bad_data_dir.name, "2020", cls.bad_rows)
 
         cls.good_data_dir = tempfile.TemporaryDirectory()
-        good_year_dir = os.path.join(cls.good_data_dir.name, "2020")
-        os.mkdir(good_year_dir)
-        _, csv_file_path = tempfile.mkstemp(suffix=".csv", dir=good_year_dir, text=True)
-        with open(csv_file_path, "w") as csv_file:
-            writer = csv.writer(csv_file)
-            writer.writerows(cls.good_rows)
+        RunTestsTest.create_data(cls.good_data_dir.name, "2020", cls.good_rows)
 
     def setUp(self):
         self.log_file = tempfile.NamedTemporaryFile(dir=self.bad_data_dir.name)
