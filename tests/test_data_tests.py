@@ -193,6 +193,7 @@ class RunTestsTest(unittest.TestCase):
         ["a", "b", "1", "2"],
         ["c", "d", "2", "3"],
     ]
+    root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
     @staticmethod
     def create_data(root_path, year, rows):
@@ -215,7 +216,8 @@ class RunTestsTest(unittest.TestCase):
         self.log_file = tempfile.NamedTemporaryFile(dir=self.bad_data_dir.name)
 
     def run_test(self, test, root_path):
-        command = ["python", os.path.join("..", "run_tests.py"), test, f"--log-file={self.log_file.name}", root_path]
+        command = ["python", os.path.join(RunTestsTest.root_path, "run_tests.py"), test,
+                   f"--log-file={self.log_file.name}", root_path]
         completed_process = subprocess.run(command, capture_output=True)
         return completed_process.returncode
 
