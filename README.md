@@ -1,4 +1,4 @@
-[![Build Status](https://github.com/openelections/openelections-data-tests/actions/workflows/unit_tests.yml/badge.svg?branch=main)](https://github.com/openelections/openelections-data-tests/actions)
+[![Build Status](https://github.com/openelections/openelections-data-tests/actions/workflows/unit_tests.yml/badge.svg?branch=main)](https://github.com/openelections/openelections-data-tests/actions/workflows/unit_tests.yml?query=branch%3Amain)
 
 # OpenElections Data Validation Tests
 A collection of tests to validate the contents of OpenElections data files.
