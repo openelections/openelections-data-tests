@@ -31,7 +31,8 @@ class DuplicateEntries:
         else:
             entries_to_hash = row
 
-        return hash("".join(entries_to_hash))
+        sep = chr(31)  # ASCII unit separator https://en.wikipedia.org/wiki/C0_and_C1_control_codes#Field_separators
+        return hash(sep.join(entries_to_hash))
 
     @staticmethod
     def __is_empty(row: list) -> bool:
