@@ -32,8 +32,7 @@ class DuplicateEntries:
         else:
             entries_to_hash = row
 
-        hashed_entries = [sha256(x.encode()).hexdigest() for x in entries_to_hash]
-        return sha256("".join(hashed_entries).encode()).hexdigest()
+        return hash("".join(entries_to_hash))
 
     @staticmethod
     def __is_empty(row: list) -> bool:
