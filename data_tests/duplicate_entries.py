@@ -1,5 +1,4 @@
 import re
-from hashlib import sha256
 
 
 class DuplicateEntries:
@@ -26,14 +25,14 @@ class DuplicateEntries:
     def passed(self) -> bool:
         return self.__passed
 
-    def __hash_row(self, row: list[str]) -> str:
+    def __hash_row(self, row: list[str]) -> int:
         if len(row) == len(self.__headers):
             entries_to_hash = (row[i] for i in self.__indices_to_hash)
         else:
             entries_to_hash = row
 
-        hashed_entries = [sha256(x.encode()).hexdigest() for x in entries_to_hash]
-        return sha256("".join(hashed_entries).encode()).hexdigest()
+        hashed_entries = (hash(x) for x in entries_to_hash)
+        return hash(tuple(hashed_entries))
 
     @staticmethod
     def __is_empty(row: list) -> bool:
