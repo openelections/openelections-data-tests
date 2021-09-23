@@ -25,7 +25,7 @@ class DuplicateEntries:
     def passed(self) -> bool:
         return self.__passed
 
-    def __hash_row(self, row: list[str]) -> str:
+    def __hash_row(self, row: list[str]) -> int:
         if len(row) == len(self.__headers):
             entries_to_hash = (row[i] for i in self.__indices_to_hash)
         else:
