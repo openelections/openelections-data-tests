@@ -41,7 +41,7 @@ class VoteBreakdownTotals:
     def test(self, row: list[str]):
         self.__current_row += 1
 
-        if (len(row) == len(self.__headers)) and self.__votes_index and self.__component_indices:
+        if (len(row) == len(self.__headers)) and self.__votes_index is not None and self.__component_indices:
             # There are cases where over votes and under votes are reported as a single aggregate.  As such, it's
             # possible for the votes to be negative.  We will try and avoid these rows.
             if self.__candidate_index is not None:
