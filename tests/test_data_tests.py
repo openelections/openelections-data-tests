@@ -294,3 +294,10 @@ class VoteBreakdownTotalsTest(unittest.TestCase):
         data_test = inconsistencies.VoteBreakdownTotals(headers)
         data_test.test(["a", "1", "8", "3", "4"])
         self.assertTrue(data_test.passed)
+
+    def test_skip_aggregate_rows(self):
+        headers = ["candidate", "votes", "mail"]
+        data_test = inconsistencies.VoteBreakdownTotals(headers)
+        data_test.test(["Total Over / Under", "-1", "0"])
+        data_test.test(["Under/ Over Votes", "-1", ""])
+        self.assertTrue(data_test.passed)
