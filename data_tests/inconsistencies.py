@@ -10,6 +10,11 @@ class VoteBreakdownTotals:
         else:
             self.__votes_index = None
 
+        if "candidate" in self.__headers:
+            self.__candidate_index = self.__headers.index("candidate")
+        else:
+            self.__candidate_index = None
+
         components = {"absentee", "early_voting", "election_day", "mail", "provisional"}
         self.__component_indices = [i for i, x in enumerate(self.__headers) if x in components]
 
@@ -37,6 +42,13 @@ class VoteBreakdownTotals:
         self.__current_row += 1
 
         if (len(row) == len(self.__headers)) and self.__votes_index and self.__component_indices:
+            # There are cases where over votes and under votes are reported as a single aggregate.  As such, it's
+            # possible for the votes to be negative.  We will try and avoid these rows.
+            if self.__candidate_index is not None:
+                aggregates = {"over/under", "under/over"}
+                if any(x in row[self.__candidate_index].lower().replace(" ", "") for x in aggregates):
+                    return
+
             try:
                 # We use float instead of int to allow for values like "3.0".
                 votes = float(row[self.__votes_index])
