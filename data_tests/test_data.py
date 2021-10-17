@@ -2,6 +2,7 @@ import csv
 import glob
 import logging
 import os
+import pathlib
 import unittest
 from typing import Iterator
 
@@ -57,8 +58,9 @@ class DuplicateEntriesTest(TestCase):
     def test_duplicate_entries(self):
         for csv_file in get_csv_files(TestCase.root_path):
             short_path = os.path.relpath(csv_file, start=TestCase.root_path)
+            year = pathlib.Path(short_path).parts[0]
 
-            with self.subTest(msg=f"{short_path}"):
+            with self.subTest(msg=f"{short_path}", group=year):
                 with open(csv_file, "r") as csv_data:
                     reader = csv.reader(csv_data)
                     headers = next(reader)
@@ -77,8 +79,9 @@ class MissingValuesTest(TestCase):
     def test_missing_values(self):
         for csv_file in get_csv_files(TestCase.root_path):
             short_path = os.path.relpath(csv_file, start=TestCase.root_path)
+            year = pathlib.Path(short_path).parts[0]
 
-            with self.subTest(msg=f"{short_path}"):
+            with self.subTest(msg=f"{short_path}", group=year):
                 tests = []
                 with open(csv_file, "r") as csv_data:
                     reader = csv.reader(csv_data)
@@ -115,8 +118,9 @@ class VoteBreakdownTotalsTest(TestCase):
     def test_vote_method_totals(self):
         for csv_file in get_csv_files(TestCase.root_path):
             short_path = os.path.relpath(csv_file, start=TestCase.root_path)
+            year = pathlib.Path(short_path).parts[0]
 
-            with self.subTest(msg=f"{short_path}"):
+            with self.subTest(msg=f"{short_path}", group=year):
                 with open(csv_file, "r") as csv_data:
                     reader = csv.reader(csv_data)
                     headers = next(reader)
