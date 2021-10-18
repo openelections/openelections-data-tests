@@ -17,6 +17,23 @@ def get_csv_files(root_path: str) -> Iterator[str]:
             yield file
 
 
+class TestResult(unittest.TextTestResult):
+    def printErrorList(self, flavour, errors):
+        group_map = {}
+        for test, error in errors:
+            group = test.params["group"]
+            if group in group_map:
+                group_map[group].append((test, error))
+            else:
+                group_map[group] = [(test, error)]
+
+        for group in sorted(group_map.keys()):
+            self.stream.write(f"::group::{group}\n")
+            # noinspection PyTypeChecker
+            super().printErrorList(flavour, group_map[group])
+            self.stream.write("::endgroup::\n")
+
+
 class TestCase(unittest.TestCase):
     log_file = None
     max_examples = -1
