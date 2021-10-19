@@ -194,6 +194,7 @@ class RunTestsTest(unittest.TestCase):
         ["c", "d", "2", "3"],
     ]
     root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+    year = "2020"
 
     @staticmethod
     def create_data(root_path, year, rows):
@@ -207,23 +208,39 @@ class RunTestsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.bad_data_dir = tempfile.TemporaryDirectory()
-        RunTestsTest.create_data(cls.bad_data_dir.name, "2020", cls.bad_rows)
+        RunTestsTest.create_data(cls.bad_data_dir.name, cls.year, cls.bad_rows)
 
         cls.good_data_dir = tempfile.TemporaryDirectory()
-        RunTestsTest.create_data(cls.good_data_dir.name, "2020", cls.good_rows)
+        RunTestsTest.create_data(cls.good_data_dir.name, cls.year, cls.good_rows)
 
     def setUp(self):
         self.log_file = tempfile.NamedTemporaryFile(dir=self.bad_data_dir.name)
 
-    def run_test(self, test, root_path):
+    def run_test(self, test, root_path, *args):
         command = ["python", os.path.join(RunTestsTest.root_path, "run_tests.py"), test,
-                   f"--log-file={self.log_file.name}", root_path]
+                   f"--log-file={self.log_file.name}"]
+        command.extend(args)
+        command.append(root_path)
         completed_process = subprocess.run(command, capture_output=True)
-        return completed_process.returncode
+        return completed_process
 
     def test_duplicate_entries(self):
         self.verify_success("duplicate_entries")
         self.verify_failure("duplicate_entries", "1 duplicate entries", [2, 3])
+
+    def test_group_failures(self):
+        completed_process = self.run_test("duplicate_entries", self.bad_data_dir.name)
+        ungrouped_output = completed_process.stderr.decode()
+        self.assertNotRegex(ungrouped_output, "::group::")
+        self.assertNotRegex(ungrouped_output, "::endgroup::")
+
+        ungrouped_lines = ungrouped_output.splitlines()
+        bad_row_indices = [i for i, row in enumerate(ungrouped_lines) if re.search("Row", row)]
+        expected_group_body = "\n".join(ungrouped_lines[:bad_row_indices[-1] + 1])
+
+        completed_process = self.run_test("duplicate_entries", self.bad_data_dir.name, "--group-failures")
+        grouped_output = completed_process.stderr.decode()
+        self.assertRegex(grouped_output, rf"::group::{self.year}\s*{re.escape(expected_group_body)}\s*::endgroup::")
 
     def test_missing_values(self):
         self.verify_success("missing_values")
@@ -234,10 +251,10 @@ class RunTestsTest(unittest.TestCase):
         self.verify_failure("vote_breakdown_totals", "1 rows.*absentee.*", [5])
 
     def verify_success(self, test):
-        self.assertEqual(0, self.run_test(test, self.good_data_dir.name))
+        self.assertEqual(0, self.run_test(test, self.good_data_dir.name).returncode)
 
     def verify_failure(self, test, expected_message, expected_rows):
-        self.assertEqual(1, self.run_test(test, self.bad_data_dir.name))
+        self.assertEqual(1, self.run_test(test, self.bad_data_dir.name).returncode)
 
         with open(self.log_file.name, "r") as log_file:
             log_file_contents = "\n".join(log_file.readlines())
