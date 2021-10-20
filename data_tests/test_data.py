@@ -2,6 +2,7 @@ import csv
 import glob
 import logging
 import os
+import pathlib
 import unittest
 from typing import Iterator
 
@@ -14,6 +15,29 @@ def get_csv_files(root_path: str) -> Iterator[str]:
     for file in glob.glob(os.path.join(root_path, "[0-9]" * 4, "**", "*"), recursive=True):
         if file.lower().endswith(".csv"):
             yield file
+
+
+class TestResult(unittest.TextTestResult):
+    # noinspection PyTypeChecker
+    def printErrorList(self, flavour, errors):
+        group_map = {}
+        ungrouped_errors = []
+        for test, error in errors:
+            if "group" in test.params:
+                group = test.params["group"]
+                if group in group_map:
+                    group_map[group].append((test, error))
+                else:
+                    group_map[group] = [(test, error)]
+            else:
+                ungrouped_errors.append((test, error))
+
+        for group in sorted(group_map.keys()):
+            self.stream.write(f"::group::{group}\n")
+            super().printErrorList(flavour, group_map[group])
+            self.stream.write("::endgroup::\n")
+
+        super().printErrorList(flavour, ungrouped_errors)
 
 
 class TestCase(unittest.TestCase):
@@ -57,8 +81,9 @@ class DuplicateEntriesTest(TestCase):
     def test_duplicate_entries(self):
         for csv_file in get_csv_files(TestCase.root_path):
             short_path = os.path.relpath(csv_file, start=TestCase.root_path)
+            year = pathlib.Path(short_path).parts[0]
 
-            with self.subTest(msg=f"{short_path}"):
+            with self.subTest(msg=f"{short_path}", group=year):
                 with open(csv_file, "r") as csv_data:
                     reader = csv.reader(csv_data)
                     headers = next(reader)
@@ -77,8 +102,9 @@ class MissingValuesTest(TestCase):
     def test_missing_values(self):
         for csv_file in get_csv_files(TestCase.root_path):
             short_path = os.path.relpath(csv_file, start=TestCase.root_path)
+            year = pathlib.Path(short_path).parts[0]
 
-            with self.subTest(msg=f"{short_path}"):
+            with self.subTest(msg=f"{short_path}", group=year):
                 tests = []
                 with open(csv_file, "r") as csv_data:
                     reader = csv.reader(csv_data)
@@ -115,8 +141,9 @@ class VoteBreakdownTotalsTest(TestCase):
     def test_vote_method_totals(self):
         for csv_file in get_csv_files(TestCase.root_path):
             short_path = os.path.relpath(csv_file, start=TestCase.root_path)
+            year = pathlib.Path(short_path).parts[0]
 
-            with self.subTest(msg=f"{short_path}"):
+            with self.subTest(msg=f"{short_path}", group=year):
                 with open(csv_file, "r") as csv_data:
                     reader = csv.reader(csv_data)
                     headers = next(reader)
