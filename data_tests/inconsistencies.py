@@ -18,13 +18,24 @@ class VoteBreakdownTotals:
         components = {"absentee", "early_voting", "election_day", "mail", "provisional"}
         self.__component_indices = [i for i, x in enumerate(self.__headers) if x in components]
 
+        # If the column headers match some known schemas, we can check for exact equality.
+        known_schemas = [
+            {"county", "precinct", "office", "district", "party", "candidate", "votes", "early_voting", "election_day",
+             "provisional", "mail"}
+        ]
+        self.__check_equality = set(self.__headers) in known_schemas
+
     @property
     def passed(self) -> bool:
         return len(self.__failures) == 0
 
     def get_failure_message(self, max_examples: int = -1) -> str:
         components = [self.__headers[i] for i in self.__component_indices]
-        message = f"There are {len(self.__failures)} rows where the sum of {components} is greater than 'votes':\n\n" \
+        if self.__check_equality:
+            relation = "not equal to"
+        else:
+            relation = "greater than"
+        message = f"There are {len(self.__failures)} rows where the sum of {components} is {relation} 'votes':\n\n" \
                   f"\tHeaders: {self.__headers}:"
 
         count = 0
@@ -56,12 +67,18 @@ class VoteBreakdownTotals:
                 return
 
             component_sum = 0
+            has_components = False
             for component in (row[i] for i in self.__component_indices):
                 try:
                     component_value = float(component)
+                    has_components = True
                 except ValueError:
                     component_value = 0
                 component_sum += component_value
 
-            if votes < component_sum:
-                self.__failures[self.__current_row] = row
+            if has_components:
+                if self.__check_equality:
+                    if votes != component_sum:
+                        self.__failures[self.__current_row] = row
+                elif votes < component_sum:
+                    self.__failures[self.__current_row] = row
