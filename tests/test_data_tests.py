@@ -268,6 +268,28 @@ class RunTestsTest(unittest.TestCase):
 
 
 class VoteBreakdownTotalsTest(unittest.TestCase):
+    def test_check_equality(self):
+        headers = ["county", "precinct", "office", "district", "party", "candidate", "election_day", "votes",
+                   "early_voting", "mail", "provisional"]
+        rows = [
+            ["a", "b", "c", "d", "e", "f", "", "12", "3", "4", "5"],
+            ["a", "b", "c", "d", "e", "f", "2", "15", "3", "4", "5"],
+            ["a", "b", "c", "d", "e", "f", "1", "13", "3", "4", "5"],
+            ["a", "b", "c", "d", "e", "f", "4", "15.0", "", "7", "5"],
+        ]
+
+        data_test = inconsistencies.VoteBreakdownTotals(headers)
+        for row in rows:
+            data_test.test(row)
+        self.assertFalse(data_test.passed)
+
+        failure_message = data_test.get_failure_message()
+        self.assertRegex(failure_message, "2 rows")
+        self.assertNotRegex(failure_message, "Row 1.*")
+        self.assertRegex(failure_message, "Row 2.*" + re.escape(f"{rows[1]}"))
+        self.assertNotRegex(failure_message, "Row 3.*")
+        self.assertRegex(failure_message, "Row 4.*" + re.escape(f"{rows[3]}"))
+
     def test_consistent(self):
         headers = ["header", "provisional", "mail", "votes", "early_voting", "election_day", "absentee"]
         rows = [
