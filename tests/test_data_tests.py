@@ -268,7 +268,7 @@ class RunTestsTest(unittest.TestCase):
 
 
 class VoteBreakdownTotalsTest(unittest.TestCase):
-    def test_check_equality(self):
+    def test_equality(self):
         headers = ["county", "precinct", "office", "district", "party", "candidate", "election_day", "votes",
                    "early_voting", "mail", "provisional"]
         rows = [
@@ -290,7 +290,7 @@ class VoteBreakdownTotalsTest(unittest.TestCase):
         self.assertNotRegex(failure_message, "Row 3.*")
         self.assertRegex(failure_message, "Row 4.*" + re.escape(f"{rows[3]}"))
 
-    def test_consistent(self):
+    def test_inequality_consistent(self):
         headers = ["header", "provisional", "mail", "votes", "early_voting", "election_day", "absentee"]
         rows = [
             ["a", "1", "2", "15", "3", "4", "5"],
@@ -309,7 +309,7 @@ class VoteBreakdownTotalsTest(unittest.TestCase):
             data_test.test(row)
         self.assertTrue(data_test.passed)
 
-    def test_inconsistent(self):
+    def test_inequality_inconsistent(self):
         headers = ["header", "provisional", "mail", "votes", "early_voting", "election_day", "absentee"]
         rows = [
             ["a", "1", "3", "15", "3", "4", "5"],
