@@ -37,5 +37,5 @@ directories named by the corresponding election years.  For example,
 
 ## Available Tests
 * `duplicate_entries` detects the presence of duplicate entries.
-* `vote_breakdown_totals` detects entries where the sum of the broken down votes (e.g., `absentee`, `early_voting`, `election_day`, `mail`, `provisional`) is greater than the total `votes`.
+* `vote_breakdown_totals` detects entries where the sum of the broken down votes (e.g., `absentee`, `early_voting`, `election_day`, `mail`, `provisional`) is greater than the total `votes`.  If the column headers match some known schemas, then the values are compared for equality.
 * `missing_values` verifies that required values are not missing.
