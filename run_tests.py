@@ -1,12 +1,13 @@
 import argparse
 import unittest
 
-from data_tests.test_data import DuplicateEntriesTest, MissingValuesTest, TestCase, VoteBreakdownTotalsTest, TestResult
+from data_tests.test_data import (DuplicateEntriesTest, FileFormatTests, MissingValuesTest, TestCase, TestResult,
+                                  VoteBreakdownTotalsTest)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("test", choices=["duplicate_entries", "missing_values", "vote_breakdown_totals"], type=str,
-                        help="the data test to run")
+    parser.add_argument("test", choices=["file_format", "duplicate_entries", "missing_values",
+                                         "vote_breakdown_totals"], type=str, help="the data test to run")
     parser.add_argument("root_path", type=str, help="the absolute path to the repository containing files to test")
     parser.add_argument("--group-failures", action="store_true",
                         help="group the failures by year in the console output using the GitHub Actions group and "
@@ -23,7 +24,9 @@ if __name__ == "__main__":
     TestCase.max_examples = args.max_examples
 
     test_class = None
-    if args.test == "duplicate_entries":
+    if args.test == "file_format":
+        test_class = FileFormatTests
+    elif args.test == "duplicate_entries":
         test_class = DuplicateEntriesTest
     elif args.test == "missing_values":
         test_class = MissingValuesTest

@@ -5,14 +5,14 @@ A collection of tests to validate the contents of OpenElections data files.
 
 ## Usage
 ```
-usage: run_tests.py [-h] [--group-failures] [--log-file LOG_FILE] [--max-examples N] {duplicate_entries,missing_values,vote_breakdown_totals} root_path
+usage: run_tests.py [-h] [--group-failures] [--log-file LOG_FILE] [--max-examples N] {file_format,duplicate_entries,missing_values,vote_breakdown_totals} root_path
 
 positional arguments:
-  {duplicate_entries,missing_values,vote_breakdown_totals}
-                        the data test to run
+  {file_format,duplicate_entries,missing_values,vote_breakdown_totals}
+                        the test to run
   root_path             the absolute path to the repository containing files to test
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --group-failures      group the failures by year in the console output using the GitHub Actions group and endgroup workflow commands
   --log-file LOG_FILE   the absolute path to a file that the full failure messages will be written to
@@ -36,6 +36,7 @@ directories named by the corresponding election years.  For example,
 ```
 
 ## Available Tests
+* `file_format` verifies the format of the data files.
 * `duplicate_entries` detects the presence of duplicate entries.
 * `vote_breakdown_totals` detects entries where the sum of the broken down votes (e.g., `absentee`, `early_voting`, `election_day`, `mail`, `provisional`) is greater than the total `votes`.  If the column headers match some known schemas, then the values are compared for equality.
 * `missing_values` verifies that required values are not missing.

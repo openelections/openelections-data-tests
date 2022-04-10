@@ -6,6 +6,7 @@ import pathlib
 import unittest
 from typing import Iterator
 
+from data_tests import format_tests
 from data_tests.duplicate_entries import DuplicateEntries
 from data_tests.inconsistencies import VoteBreakdownTotals
 from data_tests.missing_values import MissingValue
@@ -96,6 +97,60 @@ class DuplicateEntriesTest(TestCase):
                 short_message = data_test.get_failure_message(max_examples=TestCase.max_examples)
                 full_message = data_test.get_failure_message()
                 self._assertTrue(data_test.passed, f"{self} [{short_path}]", short_message, full_message)
+
+
+class FileFormatTests(TestCase):
+    def test_format(self):
+        for csv_file in get_csv_files(TestCase.root_path):
+            short_path = os.path.relpath(csv_file, start=TestCase.root_path)
+            year = pathlib.Path(short_path).parts[0]
+
+            tests = set()
+
+            header_tests = {
+                format_tests.EmptyHeaders(),
+                format_tests.LowercaseHeaders(),
+                format_tests.UnknownHeaders(),
+                format_tests.WhitespaceInHeaders(),
+            }
+            tests.update(header_tests)
+
+            tests.add(format_tests.ConsecutiveSpaces())
+            tests.add(format_tests.EmptyRows())
+            tests.add(format_tests.LeadingAndTrailingSpaces())
+            tests.add(format_tests.PrematureLineBreaks())
+            tests.add(format_tests.TabCharacters())
+
+            with self.subTest(msg=f"{short_path}", group=year):
+                with open(csv_file, "r") as csv_data:
+                    reader = csv.reader(csv_data)
+                    headers = next(reader)
+
+                    tests.add(format_tests.InconsistentNumberOfColumns(headers))
+                    tests.add(format_tests.NonIntegerVotes(headers))
+
+                    for test in tests:
+                        test.test(headers)
+
+                    row_tests = tests - header_tests
+                    for row in reader:
+                        for test in row_tests:
+                            test.test(row)
+
+                passed = True
+                short_message = ""
+                full_message = ""
+                is_first_message = True
+                for test in sorted(tests, key=lambda x: type(x).__name__):
+                    if not test.passed:
+                        passed = False
+                        short_message += f"\n\n* {test.get_failure_message(max_examples=TestCase.max_examples)}"
+                        if not is_first_message:
+                            full_message += "\n\n"
+                        full_message += f"* {test.get_failure_message()}"
+                        is_first_message = False
+
+                self._assertTrue(passed, f"{self} [{short_path}]", short_message, full_message)
 
 
 class MissingValuesTest(TestCase):
