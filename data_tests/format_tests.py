@@ -295,6 +295,29 @@ class VotesTest(RowTest):
                     self.__failures[self.current_row] = row
 
 
+class NegativeVotes(VotesTest):
+    def __init__(self, headers: list[str]):
+        super().__init__(headers)
+
+    @property
+    def _failure_description(self) -> str:
+        return "are negative"
+
+    def _is_bad_value(self, candidate: str, value: float) -> bool:
+        # There are cases where over votes and under votes are reported as a single aggregate.  As such, it's
+        # possible for the votes to be negative.  We will try and avoid these rows.
+        if candidate is not None:
+            aggregates = {"over/under", "under/over"}
+            if any(x in candidate.lower().replace(" ", "") for x in aggregates):
+                return False
+
+            # Under votes are sometimes reported as negative values.  We will try and avoid these rows.
+            if candidate.lower() == "under votes":
+                return False
+
+        return value < 0
+
+
 class NonIntegerVotes(VotesTest):
     def __init__(self, headers: list[str]):
         super().__init__(headers)
