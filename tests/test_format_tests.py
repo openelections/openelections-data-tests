@@ -174,7 +174,7 @@ class NegativeVotesTest(unittest.TestCase):
         format_test = format_tests.NegativeVotes(["a", "b", "c"])
         self.assertTrue(format_test.passed)
 
-    def test_headers(self):
+    def test_row(self):
         format_test = format_tests.NegativeVotes(["a", "b", "c"])
         format_test.test(["a", "-1", "c"])
         self.assertTrue(format_test.passed)
@@ -209,7 +209,7 @@ class NonIntegerVotesTest(unittest.TestCase):
         format_test = format_tests.NonIntegerVotes(["a", "b", "c"])
         self.assertTrue(format_test.passed)
 
-    def test_headers(self):
+    def test_row(self):
         format_test = format_tests.NonIntegerVotes(["a", "b", "c"])
         format_test.test(["a", "1.2", "c"])
         self.assertTrue(format_test.passed)
