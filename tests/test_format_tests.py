@@ -185,6 +185,13 @@ class NegativeVotesTest(unittest.TestCase):
         format_test.test(["a", "-1", "c"])
         self.assertTrue(format_test.passed)
 
+        # This should pass because the "bad" value occurs in an ignored column.
+        ignored_headers = ["Under /Over", "over/  Under", "under Votes"]
+        for header in ignored_headers:
+            format_test = format_tests.NegativeVotes(["a", header, "c"])
+            format_test.test(["a", "-1", "c"])
+            self.assertTrue(format_test.passed)
+
         good_values = ["*", "0", "2", "2.2"]
         format_test = format_tests.NegativeVotes(["a", "votes", "c"])
         for value in good_values:
