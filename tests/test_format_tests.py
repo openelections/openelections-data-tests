@@ -345,6 +345,7 @@ class RunTestsTest(unittest.TestCase):
         ["", "", "", "", ""],  # Empty rows
         ["a", "b  c", "1", "2", "3"],  # Consecutive whitespace
         ["a", "b", "c", "1", "2", "3"],  # Inconsistent number of columns
+        ["a", "b", "1", "-2", "3"],  # Negative votes
         ["a", "b", "1", "2.5", "3"],  # Non-integer votes
         [" a", "b", "1", "2", "3"],  # Leading whitespace
         ["a ", "b", "1", "2", "3"],  # Trailing whitespace
@@ -416,6 +417,7 @@ class RunTestsTest(unittest.TestCase):
         self.assertRegex(log_file_contents, "1 empty rows")
         self.assertRegex(log_file_contents, "1 rows.*consecutive whitespace")
         self.assertRegex(log_file_contents, "1 rows.*inconsistent number of columns")
+        self.assertRegex(log_file_contents, "1 rows.*negative")
         self.assertRegex(log_file_contents, "1 rows.*integers")
         self.assertRegex(log_file_contents, "2 rows.*leading or trailing whitespace")
         self.assertRegex(log_file_contents, "1 rows.*newline characters")
