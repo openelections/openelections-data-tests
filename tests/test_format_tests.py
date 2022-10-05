@@ -169,6 +169,41 @@ class LowercaseHeadersTest(unittest.TestCase):
         self.assertRegex(failure_message, re.escape(f"{header}") + ".*lowercase")
 
 
+class NegativeVotesTest(unittest.TestCase):
+    def test_empty(self):
+        format_test = format_tests.NegativeVotes(["a", "b", "c"])
+        self.assertTrue(format_test.passed)
+
+    def test_headers(self):
+        format_test = format_tests.NegativeVotes(["a", "b", "c"])
+        format_test.test(["a", "-1", "c"])
+        self.assertTrue(format_test.passed)
+
+        format_test = format_tests.NegativeVotes(["a", "Percentage", "c"])
+        format_test.test(["a", "-1", "c"])
+        self.assertTrue(format_test.passed)
+
+        good_values = ["*", "0", "2", "2.2"]
+        format_test = format_tests.NegativeVotes(["a", "votes", "c"])
+        for value in good_values:
+            format_test.test(["a", value, "c"])
+            self.assertTrue(format_test.passed)
+
+        bad_values = ["-1", "-1.2", "-0.01"]
+        vote_columns = {"absentee", "early_voting", "election_day", "mail", "provisional", "votes"}
+        for column in vote_columns:
+            for value in bad_values:
+                bad_row = ["a", 1, value, "c"]
+                format_test = format_tests.NegativeVotes(["a", "votes ", column, "c"])
+                format_test.test(["a", 1, 2, "c"])
+                format_test.test(bad_row)
+                self.assertFalse(format_test.passed)
+
+                failure_message = format_test.get_failure_message()
+                self.assertNotRegex(failure_message, "Row 1.*")
+                self.assertRegex(failure_message, f"Row 2.*" + re.escape(f"{bad_row}"))
+
+
 class NonIntegerVotesTest(unittest.TestCase):
     def test_empty(self):
         format_test = format_tests.NonIntegerVotes(["a", "b", "c"])
@@ -310,6 +345,7 @@ class RunTestsTest(unittest.TestCase):
         ["", "", "", "", ""],  # Empty rows
         ["a", "b  c", "1", "2", "3"],  # Consecutive whitespace
         ["a", "b", "c", "1", "2", "3"],  # Inconsistent number of columns
+        ["a", "b", "1", "-2", "3"],  # Negative votes
         ["a", "b", "1", "2.5", "3"],  # Non-integer votes
         [" a", "b", "1", "2", "3"],  # Leading whitespace
         ["a ", "b", "1", "2", "3"],  # Trailing whitespace
@@ -381,6 +417,7 @@ class RunTestsTest(unittest.TestCase):
         self.assertRegex(log_file_contents, "1 empty rows")
         self.assertRegex(log_file_contents, "1 rows.*consecutive whitespace")
         self.assertRegex(log_file_contents, "1 rows.*inconsistent number of columns")
+        self.assertRegex(log_file_contents, "1 rows.*negative")
         self.assertRegex(log_file_contents, "1 rows.*integers")
         self.assertRegex(log_file_contents, "2 rows.*leading or trailing whitespace")
         self.assertRegex(log_file_contents, "1 rows.*newline characters")

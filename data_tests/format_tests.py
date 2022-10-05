@@ -232,7 +232,7 @@ class InconsistentNumberOfColumns(RowTest):
             self.__failures[self.current_row] = row
 
 
-class NonIntegerVotes(RowTest):
+class VotesTest(RowTest):
     def __init__(self, headers: list[str]):
         super().__init__()
         self.__failures = {}
@@ -252,11 +252,20 @@ class NonIntegerVotes(RowTest):
             self.__candidate_index = None
 
     @property
-    def passed(self):
+    @abstractmethod
+    def _failure_description(self) -> str:
+        pass
+
+    @property
+    def passed(self) -> bool:
         return len(self.__failures) == 0
 
-    def get_failure_message(self, max_examples=-1):
-        message = f"There are {len(self.__failures)} rows with votes that aren't integers:\n\n" \
+    @abstractmethod
+    def _is_bad_value(self, candidate: str, value: float) -> bool:
+        pass
+
+    def get_failure_message(self, max_examples=-1) -> str:
+        message = f"There are {len(self.__failures)} rows with votes that {self._failure_description}:\n\n" \
                   f"\tHeaders: {self.__headers}:"
 
         count = 0
@@ -273,13 +282,6 @@ class NonIntegerVotes(RowTest):
     def _test_row(self, row: list[str]):
         if len(row) == len(self.__headers):
             for value in (row[i] for i in self.__indices_to_check):
-                # There are some rare cases where the value represents a turnout percentage.  We will try and avoid
-                # these rows.
-                percentages = {"%", "pct", "percent"}
-                if self.__candidate_index is not None \
-                        and any(x in row[self.__candidate_index].lower() for x in percentages):
-                    continue
-
                 # If the value isn't numeric, skip the test.  This can be due to the row having an inconsistent
                 # number of columns (hence the index of the "votes" column is invalid), or the value has been
                 # redacted and is represented by a non-numeric character.
@@ -288,9 +290,52 @@ class NonIntegerVotes(RowTest):
                 except ValueError:
                     continue
 
-                # This allows for "3" and "3.0", but not "3.1".
-                if not float(float_value).is_integer():
+                candidate = None if self.__candidate_index is None else row[self.__candidate_index]
+                if self._is_bad_value(candidate, float(value)):
                     self.__failures[self.current_row] = row
+
+
+class NegativeVotes(VotesTest):
+    def __init__(self, headers: list[str]):
+        super().__init__(headers)
+
+    @property
+    def _failure_description(self) -> str:
+        return "are negative"
+
+    def _is_bad_value(self, candidate: str, value: float) -> bool:
+        # There are cases where over votes and under votes are reported as a single aggregate.  As such, it's
+        # possible for the votes to be negative.  We will try and avoid these rows.
+        if candidate is not None:
+            aggregates = {"over/under", "under/over"}
+            if any(x in candidate.lower().replace(" ", "") for x in aggregates):
+                return False
+
+            # Under votes are sometimes reported as negative values.  We will try and avoid these rows.
+            if candidate.lower() == "under votes":
+                return False
+
+        return value < 0
+
+
+class NonIntegerVotes(VotesTest):
+    def __init__(self, headers: list[str]):
+        super().__init__(headers)
+
+    @property
+    def _failure_description(self) -> str:
+        return "aren't integers"
+
+    def _is_bad_value(self, candidate: str, value: float) -> bool:
+        # There are some rare cases where the value represents a turnout percentage.  We will try and avoid
+        # these rows.
+        if candidate is not None:
+            percentages = {"%", "pct", "percent"}
+            if any(x in candidate.lower() for x in percentages):
+                return False
+
+        # This allows for "3" and "3.0", but not "3.1".
+        return not value.is_integer()
 
 
 class LeadingAndTrailingSpaces(ValueTest):

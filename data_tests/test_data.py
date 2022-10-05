@@ -127,6 +127,7 @@ class FileFormatTests(TestCase):
                     headers = next(reader)
 
                     tests.add(format_tests.InconsistentNumberOfColumns(headers))
+                    tests.add(format_tests.NegativeVotes(headers))
                     tests.add(format_tests.NonIntegerVotes(headers))
 
                     for test in tests:
