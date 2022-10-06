@@ -174,14 +174,23 @@ class NegativeVotesTest(unittest.TestCase):
         format_test = format_tests.NegativeVotes(["a", "b", "c"])
         self.assertTrue(format_test.passed)
 
-    def test_headers(self):
+    def test_row(self):
+        # This should pass because the "bad" value does not occur in a vote column.
         format_test = format_tests.NegativeVotes(["a", "b", "c"])
         format_test.test(["a", "-1", "c"])
         self.assertTrue(format_test.passed)
 
+        # This should pass because the "bad" value does not occur in a vote column.
         format_test = format_tests.NegativeVotes(["a", "Percentage", "c"])
         format_test.test(["a", "-1", "c"])
         self.assertTrue(format_test.passed)
+
+        # This should pass because the "bad" value occurs in an ignored column.
+        ignored_headers = ["Under /Over", "over/  Under", "under Votes"]
+        for header in ignored_headers:
+            format_test = format_tests.NegativeVotes(["a", header, "c"])
+            format_test.test(["a", "-1", "c"])
+            self.assertTrue(format_test.passed)
 
         good_values = ["*", "0", "2", "2.2"]
         format_test = format_tests.NegativeVotes(["a", "votes", "c"])
@@ -209,11 +218,13 @@ class NonIntegerVotesTest(unittest.TestCase):
         format_test = format_tests.NonIntegerVotes(["a", "b", "c"])
         self.assertTrue(format_test.passed)
 
-    def test_headers(self):
+    def test_row(self):
+        # This should pass because the "bad" value does not occur in a vote column.
         format_test = format_tests.NonIntegerVotes(["a", "b", "c"])
         format_test.test(["a", "1.2", "c"])
         self.assertTrue(format_test.passed)
 
+        # This should pass because the "bad" value occurs in an ignored column.
         format_test = format_tests.NonIntegerVotes(["a", "Percentage", "c"])
         format_test.test(["a", "1.2", "c"])
         self.assertTrue(format_test.passed)
