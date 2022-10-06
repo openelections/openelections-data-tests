@@ -6,15 +6,15 @@ class FormatTest(ABC):
     @property
     @abstractmethod
     def passed(self) -> bool:
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
     def get_failure_message(self, max_examples: int) -> str:
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
     def test(self, value):
-        pass
+        raise NotImplementedError()
 
 
 # noinspection PyAbstractClass
@@ -33,7 +33,7 @@ class RowTest(FormatTest):
 
     @abstractmethod
     def _test_row(self, row: list[str]):
-        pass
+        raise NotImplementedError()
 
 
 class ValueTest(RowTest):
@@ -44,7 +44,7 @@ class ValueTest(RowTest):
     @property
     @abstractmethod
     def description(self) -> str:
-        pass
+        raise NotImplementedError()
 
     @property
     def passed(self):
@@ -65,7 +65,7 @@ class ValueTest(RowTest):
 
     @abstractmethod
     def is_bad_value(self, value) -> bool:
-        pass
+        raise NotImplementedError()
 
     def _test_row(self, row: list[str]):
         for entry in row:
@@ -254,7 +254,7 @@ class VotesTest(RowTest):
     @property
     @abstractmethod
     def _failure_description(self) -> str:
-        pass
+        raise NotImplementedError()
 
     @property
     def passed(self) -> bool:
@@ -262,7 +262,7 @@ class VotesTest(RowTest):
 
     @abstractmethod
     def _is_bad_value(self, candidate: str, value: float) -> bool:
-        pass
+        raise NotImplementedError()
 
     def get_failure_message(self, max_examples=-1) -> str:
         message = f"There are {len(self.__failures)} rows with votes that {self._failure_description}:\n\n" \
