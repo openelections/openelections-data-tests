@@ -21,14 +21,14 @@ class FormatTest(ABC):
 class RowTest(FormatTest):
     def __init__(self):
         super().__init__()
-        self.__current_row = 0
+        self._current_row = 0
 
     @property
     def current_row(self) -> int:
-        return self.__current_row
+        return self._current_row
 
     def test(self, value):
-        self.__current_row += 1
+        self._current_row += 1
         self._test_row(value)
 
     @abstractmethod
@@ -39,7 +39,7 @@ class RowTest(FormatTest):
 class ValueTest(RowTest):
     def __init__(self):
         super().__init__()
-        self.__failures = {}
+        self._failures = {}
 
     @property
     @abstractmethod
@@ -48,12 +48,12 @@ class ValueTest(RowTest):
 
     @property
     def passed(self):
-        return len(self.__failures) == 0
+        return len(self._failures) == 0
 
     def get_failure_message(self, max_examples=-1):
-        message = f"There are {len(self.__failures)} rows that have entries with {self.description}:\n"
+        message = f"There are {len(self._failures)} rows that have entries with {self.description}:\n"
         count = 0
-        for key, value in self.__failures.items():
+        for key, value in self._failures.items():
             if (max_examples >= 0) and (count >= max_examples):
                 message += f"\n\t[Truncated to {max_examples} examples]"
                 return message
@@ -70,81 +70,81 @@ class ValueTest(RowTest):
     def _test_row(self, row: list[str]):
         for entry in row:
             if self.is_bad_value(entry):
-                self.__failures[self.current_row] = row
+                self._failures[self.current_row] = row
                 break
 
 
 class EmptyHeaders(FormatTest):
     def __init__(self):
         super().__init__()
-        self.__headers = []
-        self.__passed = True
+        self._headers = []
+        self._passed = True
 
     @property
     def passed(self):
-        return self.__passed
+        return self._passed
 
     def get_failure_message(self, max_examples=0):
-        return f"Header {self.__headers} has empty entries."
+        return f"Header {self._headers} has empty entries."
 
     def test(self, headers: list[str]):
-        self.__headers = headers
-        self.__passed = "" not in headers
+        self._headers = headers
+        self._passed = "" not in headers
 
 
 class LowercaseHeaders(FormatTest):
     def __init__(self):
         super().__init__()
-        self.__headers = []
-        self.__passed = True
+        self._headers = []
+        self._passed = True
 
     @property
     def passed(self):
-        return self.__passed
+        return self._passed
 
     def get_failure_message(self, max_examples=0):
-        return f"Header {self.__headers} should only contain lowercase characters."
+        return f"Header {self._headers} should only contain lowercase characters."
 
     def test(self, headers: list[str]):
-        self.__headers = headers
-        self.__passed = headers == [x.lower() for x in headers]
+        self._headers = headers
+        self._passed = headers == [x.lower() for x in headers]
 
 
 class MissingHeaders(FormatTest):
     def __init__(self, required_headers: set[str]):
         super().__init__()
-        self.__headers = []
-        self.__passed = True
-        self.__required_headers = required_headers
+        self._headers = []
+        self._passed = True
+        self._required_headers = required_headers
 
     @property
     def passed(self):
-        return self.__passed
+        return self._passed
 
     def get_failure_message(self, max_examples=0):
-        return f"Header {self.__headers} is missing entries: {self.__required_headers.difference(self.__headers)}."
+        return f"Header {self._headers} is missing entries: {self._required_headers.difference(self._headers)}."
 
     def test(self, headers: list[str]):
-        self.__headers = headers
-        self.__passed = self.__required_headers.issubset(headers)
+        self._headers = headers
+        self._passed = self._required_headers.issubset(headers)
 
 
 class UnknownHeaders(FormatTest):
     def __init__(self):
         super().__init__()
-        self.__headers = []
-        self.__passed = True
+        self._headers = []
+        self._passed = True
 
     @property
     def passed(self):
-        return self.__passed
+        return self._passed
 
     def get_failure_message(self, max_examples=0):
-        return f"Header {self.__headers} has unknown entries."
+        return f"Header {self._headers} has unknown entries."
 
     def test(self, headers: list[str]):
-        self.__headers = headers
-        self.__passed = "unknown" not in [x.strip().lower() for x in headers]
+        self._headers = headers
+        self._passed = "unknown" not in [x.strip().lower() for x in headers]
 
 
 class WhitespaceInHeaders(FormatTest):
@@ -152,19 +152,19 @@ class WhitespaceInHeaders(FormatTest):
 
     def __init__(self):
         super().__init__()
-        self.__headers = []
-        self.__passed = True
+        self._headers = []
+        self._passed = True
 
     @property
     def passed(self):
-        return self.__passed
+        return self._passed
 
     def get_failure_message(self, max_examples=0):
-        return f"Header {self.__headers} contains whitespace characters."
+        return f"Header {self._headers} contains whitespace characters."
 
     def test(self, headers: list[str]):
-        self.__headers = headers
-        self.__passed = not any(bool(WhitespaceInHeaders.regex.search(x)) for x in self.__headers)
+        self._headers = headers
+        self._passed = not any(bool(WhitespaceInHeaders.regex.search(x)) for x in self._headers)
 
 
 class ConsecutiveSpaces(ValueTest):
@@ -183,14 +183,14 @@ class EmptyRows(RowTest):
 
     def __init__(self):
         super().__init__()
-        self.__empty_row_count = 0
+        self._empty_row_count = 0
 
     @property
     def passed(self):
-        return self.__empty_row_count == 0
+        return self._empty_row_count == 0
 
     def get_failure_message(self, max_examples=0):
-        return f"Has {self.__empty_row_count} empty rows."
+        return f"Has {self._empty_row_count} empty rows."
 
     def _test_row(self, row: list[str]):
         has_content = False
@@ -198,26 +198,26 @@ class EmptyRows(RowTest):
             has_content |= bool(EmptyRows.regex.search(entry))
 
         if not has_content:
-            self.__empty_row_count += 1
+            self._empty_row_count += 1
 
 
 class InconsistentNumberOfColumns(RowTest):
     def __init__(self, headers):
         super().__init__()
-        self.__failures = {}
-        self.__headers = headers
+        self._failures = {}
+        self._headers = headers
 
     @property
     def passed(self):
-        return len(self.__failures) == 0
+        return len(self._failures) == 0
 
     def get_failure_message(self, max_examples=-1):
-        message = f"Header has {len(self.__headers)} entries, but there are {len(self.__failures)} " \
+        message = f"Header has {len(self._headers)} entries, but there are {len(self._failures)} " \
                   f"rows with an inconsistent number of columns:\n\n" \
-                  f"\tHeaders ({len(self.__headers)} entries): {self.__headers}:"
+                  f"\tHeaders ({len(self._headers)} entries): {self._headers}:"
 
         count = 0
-        for key, value in self.__failures.items():
+        for key, value in self._failures.items():
             if (max_examples >= 0) and (count >= max_examples):
                 message += f"\n\t[Truncated to {max_examples} examples]"
                 return message
@@ -228,15 +228,15 @@ class InconsistentNumberOfColumns(RowTest):
         return message
 
     def _test_row(self, row: list[str]):
-        if len(row) != len(self.__headers):
-            self.__failures[self.current_row] = row
+        if len(row) != len(self._headers):
+            self._failures[self.current_row] = row
 
 
 class VotesTest(RowTest):
     def __init__(self, headers: list[str]):
         super().__init__()
-        self.__failures = {}
-        self.__headers = headers
+        self._failures = {}
+        self._headers = headers
 
         columns_to_check = {"absentee", "early_voting", "election_day", "mail", "provisional", "votes"}
         lowercase_headers = [x.strip().lower() for x in headers]
@@ -244,12 +244,12 @@ class VotesTest(RowTest):
         for index, header in enumerate(lowercase_headers):
             if header in columns_to_check:
                 indices_to_check.append(index)
-        self.__indices_to_check = indices_to_check
+        self._indices_to_check = indices_to_check
 
         if "candidate" in lowercase_headers:
-            self.__candidate_index = lowercase_headers.index("candidate")
+            self._candidate_index = lowercase_headers.index("candidate")
         else:
-            self.__candidate_index = None
+            self._candidate_index = None
 
     @property
     @abstractmethod
@@ -258,18 +258,18 @@ class VotesTest(RowTest):
 
     @property
     def passed(self) -> bool:
-        return len(self.__failures) == 0
+        return len(self._failures) == 0
 
     @abstractmethod
     def _is_bad_value(self, candidate: str, value: float) -> bool:
         raise NotImplementedError()
 
     def get_failure_message(self, max_examples=-1) -> str:
-        message = f"There are {len(self.__failures)} rows with votes that {self._failure_description}:\n\n" \
-                  f"\tHeaders: {self.__headers}:"
+        message = f"There are {len(self._failures)} rows with votes that {self._failure_description}:\n\n" \
+                  f"\tHeaders: {self._headers}:"
 
         count = 0
-        for key, value in self.__failures.items():
+        for key, value in self._failures.items():
             if (max_examples >= 0) and (count >= max_examples):
                 message += f"\n\t[Truncated to {max_examples} examples]"
                 return message
@@ -280,8 +280,8 @@ class VotesTest(RowTest):
         return message
 
     def _test_row(self, row: list[str]):
-        if len(row) == len(self.__headers):
-            for value in (row[i] for i in self.__indices_to_check):
+        if len(row) == len(self._headers):
+            for value in (row[i] for i in self._indices_to_check):
                 # If the value isn't numeric, skip the test.  This can be due to the row having an inconsistent
                 # number of columns (hence the index of the "votes" column is invalid), or the value has been
                 # redacted and is represented by a non-numeric character.
@@ -290,9 +290,9 @@ class VotesTest(RowTest):
                 except ValueError:
                     continue
 
-                candidate = None if self.__candidate_index is None else row[self.__candidate_index]
+                candidate = None if self._candidate_index is None else row[self._candidate_index]
                 if self._is_bad_value(candidate, float(value)):
-                    self.__failures[self.current_row] = row
+                    self._failures[self.current_row] = row
 
 
 class NegativeVotes(VotesTest):

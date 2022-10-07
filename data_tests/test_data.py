@@ -50,9 +50,9 @@ class TestCase(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
         if TestCase.log_file is None:
-            self.__logger = None
+            self._logger = None
         else:
-            self.__logger = TestCase.__get_logger(type(self).__name__, TestCase.log_file)
+            self._logger = TestCase._get_logger(type(self).__name__, TestCase.log_file)
 
     def _assertTrue(self, result: bool, description: str, short_message: str, full_message: str):
         if not result:
@@ -60,14 +60,14 @@ class TestCase(unittest.TestCase):
         self.assertTrue(result, short_message)
 
     def _log_failure(self, description: str, message: str):
-        if self.__logger is not None:
-            self.__logger.debug("======================================================================")
-            self.__logger.debug(f"FAIL: {description}")
-            self.__logger.debug("----------------------------------------------------------------------")
-            self.__logger.debug(f"{message}\n")
+        if self._logger is not None:
+            self._logger.debug("======================================================================")
+            self._logger.debug(f"FAIL: {description}")
+            self._logger.debug("----------------------------------------------------------------------")
+            self._logger.debug(f"{message}\n")
 
     @staticmethod
-    def __get_logger(name: str, log_file: str) -> logging.Logger:
+    def _get_logger(name: str, log_file: str) -> logging.Logger:
         handler = logging.FileHandler(log_file)
         handler.setFormatter(logging.Formatter("%(message)s"))
 
