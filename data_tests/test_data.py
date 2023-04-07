@@ -36,6 +36,7 @@ class TestResult(unittest.TextTestResult):
 
 
 class TestCase(unittest.TestCase):
+    files = list()
     log_file = None
     max_examples = -1
     root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
@@ -61,7 +62,12 @@ class TestCase(unittest.TestCase):
             self._logger.debug(f"{message}\n")
 
     def get_csv_files(self) -> Iterator[str]:
-        for file in glob.glob(os.path.join(TestCase.root_path, "[0-9]" * 4, "**", "*"), recursive=True):
+        if TestCase.files:
+            file_list = [os.path.join(TestCase.root_path, x) for x in TestCase.files]
+        else:
+            file_list = glob.glob(os.path.join(TestCase.root_path, "[0-9]" * 4, "**", "*"), recursive=True)
+
+        for file in file_list:
             if file.lower().endswith(".csv"):
                 short_path = os.path.relpath(file, start=TestCase.root_path)
                 year = pathlib.Path(short_path).parts[0]

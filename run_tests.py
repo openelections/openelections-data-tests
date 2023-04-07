@@ -9,6 +9,8 @@ if __name__ == "__main__":
     parser.add_argument("test", choices=["file_format", "duplicate_entries", "missing_values",
                                          "vote_breakdown_totals"], type=str, help="the data test to run")
     parser.add_argument("root_path", type=str, help="the absolute path to the repository containing files to test")
+    parser.add_argument("--files", type=str, metavar="FILE", nargs="+", help="limit the tests to these specific files, "
+                                                                             "specified relative to the root path")
     parser.add_argument("--group-failures", action="store_true",
                         help="group the failures by year in the console output using the GitHub Actions group and "
                              "endgroup workflow commands")
@@ -20,6 +22,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     TestCase.root_path = args.root_path
+    TestCase.files = args.files
     TestCase.log_file = args.log_file
     TestCase.max_examples = args.max_examples
 
