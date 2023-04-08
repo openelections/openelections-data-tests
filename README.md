@@ -5,7 +5,7 @@ A collection of tests to validate the contents of OpenElections data files.
 
 ## Usage
 ```
-usage: run_tests.py [-h] [--group-failures] [--log-file LOG_FILE] [--max-examples N] {file_format,duplicate_entries,missing_values,vote_breakdown_totals} root_path
+usage: run_tests.py [-h] [--files FILE [FILE ...]] [--group-failures] [--log-file LOG_FILE] [--max-examples N] {file_format,duplicate_entries,missing_values,vote_breakdown_totals} root_path
 
 positional arguments:
   {file_format,duplicate_entries,missing_values,vote_breakdown_totals}
@@ -14,6 +14,8 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
+  --files FILE [FILE ...]
+                        limit the tests to these specific files, specified relative to the root path
   --group-failures      group the failures by year in the console output using the GitHub Actions group and endgroup workflow commands
   --log-file LOG_FILE   the absolute path to a file that the full failure messages will be written to
   --max-examples N      the maximum number of failing rows to print to the console. If a negative value is provided, all failures will be printed.
