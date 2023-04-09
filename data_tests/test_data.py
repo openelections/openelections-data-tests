@@ -52,7 +52,7 @@ class TestCase(unittest.TestCase):
 
     def _assertTrue(self, result: bool, description: str, short_message: str, full_message: str):
         if not result:
-            self._log_failure(description, short_message if self.truncate_log_file else full_message)
+            self._log_failure(description, full_message)
         self.assertTrue(result, short_message)
 
     def _log_failure(self, description: str, message: str):
@@ -88,6 +88,7 @@ class TestCase(unittest.TestCase):
 
 class DuplicateEntriesTest(TestCase):
     def test_duplicate_entries(self):
+        log_file_max_examples = TestCase.max_examples if TestCase.truncate_log_file else -1
         for csv_file, short_path, year in self.get_csv_files():
             with self.subTest(msg=f"{short_path}", group=year):
                 with open(csv_file, "r") as csv_data:
@@ -100,12 +101,13 @@ class DuplicateEntriesTest(TestCase):
                         data_test.test(row)
 
                 short_message = data_test.get_failure_message(max_examples=TestCase.max_examples)
-                full_message = data_test.get_failure_message()
+                full_message = data_test.get_failure_message(max_examples=log_file_max_examples)
                 self._assertTrue(data_test.passed, f"{self} [{short_path}]", short_message, full_message)
 
 
 class FileFormatTests(TestCase):
     def test_format(self):
+        log_file_max_examples = TestCase.max_examples if TestCase.truncate_log_file else -1
         for csv_file, short_path, year in self.get_csv_files():
             tests = set()
 
@@ -150,7 +152,7 @@ class FileFormatTests(TestCase):
                         short_message += f"\n\n* {test.get_failure_message(max_examples=TestCase.max_examples)}"
                         if not is_first_message:
                             full_message += "\n\n"
-                        full_message += f"* {test.get_failure_message()}"
+                        full_message += f"* {test.get_failure_message(max_examples=log_file_max_examples)}"
                         is_first_message = False
 
                 self._assertTrue(passed, f"{self} [{short_path}]", short_message, full_message)
@@ -158,6 +160,7 @@ class FileFormatTests(TestCase):
 
 class MissingValuesTest(TestCase):
     def test_missing_values(self):
+        log_file_max_examples = TestCase.max_examples if TestCase.truncate_log_file else -1
         for csv_file, short_path, year in self.get_csv_files():
             with self.subTest(msg=f"{short_path}", group=year):
                 tests = []
@@ -186,7 +189,7 @@ class MissingValuesTest(TestCase):
                         short_message += f"\n\n* {test.get_failure_message(max_examples=TestCase.max_examples)}"
                         if not is_first_message:
                             full_message += "\n\n"
-                        full_message += f"* {test.get_failure_message()}"
+                        full_message += f"* {test.get_failure_message(max_examples=log_file_max_examples)}"
                         is_first_message = False
 
                 self._assertTrue(passed, f"{self} [{short_path}]", short_message, full_message)
@@ -194,6 +197,7 @@ class MissingValuesTest(TestCase):
 
 class VoteBreakdownTotalsTest(TestCase):
     def test_vote_method_totals(self):
+        log_file_max_examples = TestCase.max_examples if TestCase.truncate_log_file else -1
         for csv_file, short_path, year in self.get_csv_files():
             with self.subTest(msg=f"{short_path}", group=year):
                 with open(csv_file, "r") as csv_data:
@@ -206,5 +210,5 @@ class VoteBreakdownTotalsTest(TestCase):
                         data_test.test(row)
 
                 short_message = data_test.get_failure_message(max_examples=TestCase.max_examples)
-                full_message = data_test.get_failure_message()
+                full_message = data_test.get_failure_message(max_examples=log_file_max_examples)
                 self._assertTrue(data_test.passed, f"{self} [{short_path}]", short_message, full_message)
