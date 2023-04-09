@@ -40,6 +40,7 @@ class TestCase(unittest.TestCase):
     log_file = None
     max_examples = -1
     root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+    truncate_log_file = False
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -51,7 +52,7 @@ class TestCase(unittest.TestCase):
 
     def _assertTrue(self, result: bool, description: str, short_message: str, full_message: str):
         if not result:
-            self._log_failure(description, full_message)
+            self._log_failure(description, short_message if self.truncate_log_file else full_message)
         self.assertTrue(result, short_message)
 
     def _log_failure(self, description: str, message: str):
