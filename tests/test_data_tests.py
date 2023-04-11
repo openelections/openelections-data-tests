@@ -1,4 +1,5 @@
 import csv
+import glob
 import os
 import re
 import subprocess
@@ -218,9 +219,8 @@ class RunTestsTest(unittest.TestCase):
 
     def run_test(self, test, root_path, *args):
         command = ["python", os.path.join(RunTestsTest.root_path, "run_tests.py"), test,
-                   f"--log-file={self.log_file.name}"]
+                   f"--log-file={self.log_file.name}", root_path]
         command.extend(args)
-        command.append(root_path)
         completed_process = subprocess.run(command, capture_output=True)
         return completed_process
 
@@ -231,6 +231,10 @@ class RunTestsTest(unittest.TestCase):
     def test_group_failures(self):
         completed_process = self.run_test("duplicate_entries", self.bad_data_dir.name)
         ungrouped_output = completed_process.stderr.decode()
+
+        # Skip success (.) or failure (F) indicators.
+        ungrouped_output = ungrouped_output[ungrouped_output.find("\n"):]
+
         self.assertNotRegex(ungrouped_output, "::group::")
         self.assertNotRegex(ungrouped_output, "::endgroup::")
 
@@ -246,15 +250,28 @@ class RunTestsTest(unittest.TestCase):
         self.verify_success("missing_values")
         self.verify_failure("missing_values", "1 rows.*missing.*county", [4])
 
+    def test_specific_files(self):
+        good_files = [
+            os.path.relpath(f, self.good_data_dir.name)
+            for f in glob.glob(os.path.join(self.root_path,self.good_data_dir.name, "**", "*"))
+        ]
+        self.verify_success("missing_values", "--files", f"{' '.join(good_files)}")
+
+        bad_files = [
+            os.path.relpath(f, self.bad_data_dir.name)
+            for f in glob.glob(os.path.join(self.root_path, self.bad_data_dir.name, "**", "*"))
+        ]
+        self.verify_failure("missing_values", "1 rows.*missing.*county", [4], "--files", f"{' '.join(bad_files)}")
+
     def test_vote_breakdown_totals(self):
         self.verify_success("vote_breakdown_totals")
         self.verify_failure("vote_breakdown_totals", "1 rows.*absentee.*", [5])
 
-    def verify_success(self, test):
-        self.assertEqual(0, self.run_test(test, self.good_data_dir.name).returncode)
+    def verify_success(self, test, *args):
+        self.assertEqual(0, self.run_test(test, self.good_data_dir.name, *args).returncode)
 
-    def verify_failure(self, test, expected_message, expected_rows):
-        self.assertEqual(1, self.run_test(test, self.bad_data_dir.name).returncode)
+    def verify_failure(self, test, expected_message, expected_rows, *args):
+        self.assertEqual(1, self.run_test(test, self.bad_data_dir.name, *args).returncode)
 
         with open(self.log_file.name, "r") as log_file:
             log_file_contents = "\n".join(log_file.readlines())
