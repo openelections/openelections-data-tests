@@ -404,6 +404,10 @@ class RunTestsTest(unittest.TestCase):
     def test_group_failures(self):
         completed_process = self.run_test(self.bad_data_dir.name)
         ungrouped_output = completed_process.stderr.decode()
+
+        # Skip success (.) or failure (F) indicators.
+        ungrouped_output = ungrouped_output[ungrouped_output.find("\n"):]
+
         self.assertNotRegex(ungrouped_output, "::group::")
         self.assertNotRegex(ungrouped_output, "::endgroup::")
 
