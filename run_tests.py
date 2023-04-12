@@ -16,6 +16,8 @@ if __name__ == "__main__":
                              "endgroup workflow commands")
     parser.add_argument("--log-file", type=str, help="the absolute path to a file that the full failure messages will "
                                                      "be written to")
+    parser.add_argument("--truncate-log-file", action="store_true",
+                        help="truncate the entries in the log file according to the --max-examples option.")
     parser.add_argument("--max-examples", type=int, default=10, metavar="N",
                         help="the maximum number of failing rows to print to the console. If a negative value is "
                              "provided, all failures will be printed.")
@@ -25,6 +27,7 @@ if __name__ == "__main__":
     TestCase.files = args.files
     TestCase.log_file = args.log_file
     TestCase.max_examples = args.max_examples
+    TestCase.truncate_log_file = args.truncate_log_file
 
     test_class = None
     if args.test == "file_format":
